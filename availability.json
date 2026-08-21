@@ -1,10 +1,9 @@
 {
-  "lastUpdated": "2026-08-21 08:20:08",
+  "lastUpdated": "2026-08-21 08:48:53",
   "partySize": 3,
   "note": "Dine-in and takeaway are shown separately.",
   "bookingPage": "https://reservation.umai.io/en/widget/rembayung",
   "furthestBookable": "2026-09-03",
-  "nextUnlockDate": "2026-09-04",
   "bookingWindowDays": 13,
   "dates": [
     {
@@ -16,7 +15,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-08-22",
@@ -27,7 +28,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-08-23",
@@ -38,7 +41,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-08-24",
@@ -49,7 +54,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-08-25",
@@ -60,7 +67,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-08-26",
@@ -71,7 +80,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-08-27",
@@ -82,7 +93,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-08-28",
@@ -93,7 +106,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-08-29",
@@ -104,7 +119,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-08-30",
@@ -115,7 +132,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-08-31",
@@ -126,7 +145,9 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-09-01",
@@ -142,7 +163,9 @@
         "18:45"
       ],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": "2026-08-21 08:48:53"
     },
     {
       "date": "2026-09-02",
@@ -159,7 +182,9 @@
         "18:45"
       ],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": "2026-08-21 08:48:53"
     },
     {
       "date": "2026-09-03",
@@ -176,7 +201,9 @@
         "18:45"
       ],
       "takeawayName": "",
-      "note": "no dine-in yet"
+      "note": "no dine-in yet",
+      "dineInOpenedAt": null,
+      "takeawayOpenedAt": "2026-08-21 08:48:53"
     }
   ]
 }
