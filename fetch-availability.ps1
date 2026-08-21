@@ -211,12 +211,29 @@ if ($newlyOpen.Count -gt 0) {
     Write-Host "No newly-opened dates since last check."
 }
 
+# Booking horizon: furthest date that currently has any released slot inventory,
+# plus the next date that will roll into the window (≈00:00 MYT, per rolling_days rule).
+$furthest = $null
+foreach ($r in $results) {
+    if (($r.available -or $r.takeaway) -and ($null -eq $furthest -or $r.date -gt $furthest)) { $furthest = $r.date }
+}
+$nextUnlock = $null; $windowDays = $null
+if ($furthest) {
+    $fbDate = [datetime]::Parse($furthest)
+    $nextUnlock = $fbDate.AddDays(1).ToString('yyyy-MM-dd')
+    $windowDays = ($fbDate - (Get-Date).Date).Days
+    Write-Host "Booking horizon: up to $furthest (window ~$windowDays days); next date unlocks ~$nextUnlock"
+}
+
 $out = [PSCustomObject]@{
-    lastUpdated = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-    partySize   = $PartySize
-    note        = 'Dine-in and takeaway are shown separately.'
-    bookingPage = $BookingPage
-    dates       = $results
+    lastUpdated        = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    partySize          = $PartySize
+    note               = 'Dine-in and takeaway are shown separately.'
+    bookingPage        = $BookingPage
+    furthestBookable   = $furthest
+    nextUnlockDate     = $nextUnlock
+    bookingWindowDays  = $windowDays
+    dates              = $results
 }
 $out | ConvertTo-Json -Depth 4 | Set-Content -Path $OutFile -Encoding UTF8
 Write-Host "Wrote $OutFile ($($results.Count) dates)."

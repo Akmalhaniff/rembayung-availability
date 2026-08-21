@@ -36,6 +36,7 @@
   .closed-note { color:var(--muted); font-size:.85rem; margin-top:2px; }
   .book { display:inline-block; margin-top:10px; color:var(--accent); text-decoration:none; font-weight:600; }
   .empty { text-align:center; color:var(--muted); margin-top:30px; }
+  .horizon { text-align:center; margin:0 0 18px; font-size:.9rem; color:var(--accent); }
   footer { text-align:center; color:var(--muted); font-size:.75rem; padding:0 16px 30px; }
   a { color:var(--accent); }
 </style>
@@ -47,6 +48,7 @@
 </header>
 <main>
   <div class="summary" id="summary"></div>
+  <div class="horizon" id="horizon"></div>
   <div id="list"></div>
   <div class="empty" id="empty" style="display:none;">No dine-in slots open right now. Check back soon.</div>
 </main>
@@ -101,6 +103,14 @@ function render(data){
   const list = document.getElementById('list');
   list.innerHTML = '';
   document.getElementById('empty').style.display = 'none';
+
+  const horizon = document.getElementById('horizon');
+  if (data.furthestBookable) {
+    const next = data.nextUnlockDate ? (' &middot; next date opens ~ ' + fmtDate(data.nextUnlockDate) + ' <span style="color:var(--muted)">(≈00:00 MYT)</span>') : '';
+    horizon.innerHTML = 'Bookable up to <b>' + fmtDate(data.furthestBookable) + '</b>' + next;
+  } else {
+    horizon.textContent = 'No bookable dates in the scanned range yet.';
+  }
 
   dates.forEach(d => {
     const diOpen = !!d.available, taOpen = !!d.takeaway;
