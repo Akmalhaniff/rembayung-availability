@@ -211,19 +211,39 @@ if ($newlyOpen.Count -gt 0) {
     Write-Host "No newly-opened dates since last check."
 }
 
-# Booking horizon: furthest date that currently has any released slot inventory,
-# plus the next date that will roll into the window (≈00:00 MYT, per rolling_days rule).
+# Booking horizon: furthest date that currently has any released slot inventory.
 $furthest = $null
 foreach ($r in $results) {
     if (($r.available -or $r.takeaway) -and ($null -eq $furthest -or $r.date -gt $furthest)) { $furthest = $r.date }
 }
-$nextUnlock = $null; $windowDays = $null
+$windowDays = $null
 if ($furthest) {
     $fbDate = [datetime]::Parse($furthest)
-    $nextUnlock = $fbDate.AddDays(1).ToString('yyyy-MM-dd')
     $windowDays = ($fbDate - (Get-Date).Date).Days
-    Write-Host "Booking horizon: up to $furthest (window ~$windowDays days); next date unlocks ~$nextUnlock"
+    Write-Host "Booking horizon: up to $furthest (window ~$windowDays days)"
 }
+
+# Record the EXACT time each date first opened for booking (dine-in / takeaway),
+# persisted across runs so we learn the real release schedule.
+$openedDir = [System.IO.Path]::GetDirectoryName($OutFile)
+if (-not $openedDir) { $openedDir = '.' }
+$openedFile = Join-Path $openedDir 'opened.json'
+$opened = @{ dineIn = @{}; takeaway = @{} }
+if (Test-Path $openedFile) {
+    try {
+        $o = (Get-Content $openedFile -Raw | ConvertFrom-Json)
+        if ($o.dineIn)   { foreach ($k in $o.dineIn.PSObject.Properties.Name)   { $opened.dineIn[$k]   = $o.dineIn.$k } }
+        if ($o.takeaway) { foreach ($k in $o.takeaway.PSObject.Properties.Name) { $opened.takeaway[$k] = $o.takeaway.$k } }
+    } catch { Write-Host "[opened] could not read: $_" }
+}
+$nowIso = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+foreach ($r in $results) {
+    if ($r.available -and -not $opened.dineIn[$r.date])   { $opened.dineIn[$r.date]   = $nowIso }
+    if ($r.takeaway -and -not $opened.takeaway[$r.date]) { $opened.takeaway[$r.date] = $nowIso }
+    if ($r.available)   { $r | Add-Member -NotePropertyName dineInOpenedAt   -NotePropertyValue $opened.dineIn[$r.date]   -Force } else { $r | Add-Member -NotePropertyName dineInOpenedAt   -NotePropertyValue $null -Force }
+    if ($r.takeaway) { $r | Add-Member -NotePropertyName takeawayOpenedAt -NotePropertyValue $opened.takeaway[$r.date] -Force } else { $r | Add-Member -NotePropertyName takeawayOpenedAt -NotePropertyValue $null -Force }
+}
+$opened | ConvertTo-Json -Depth 3 | Set-Content -Path $openedFile -Encoding UTF8
 
 $out = [PSCustomObject]@{
     lastUpdated        = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
@@ -231,7 +251,6 @@ $out = [PSCustomObject]@{
     note               = 'Dine-in and takeaway are shown separately.'
     bookingPage        = $BookingPage
     furthestBookable   = $furthest
-    nextUnlockDate     = $nextUnlock
     bookingWindowDays  = $windowDays
     dates              = $results
 }

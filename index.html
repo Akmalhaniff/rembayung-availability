@@ -34,6 +34,7 @@
   .chip.take { background:rgba(52,152,219,.15); color:#5dade2; }
   .label { margin-top:10px; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
   .closed-note { color:var(--muted); font-size:.85rem; margin-top:2px; }
+  .opened { color:var(--muted); font-size:.75rem; margin-top:4px; }
   .book { display:inline-block; margin-top:10px; color:var(--accent); text-decoration:none; font-weight:600; }
   .empty { text-align:center; color:var(--muted); margin-top:30px; }
   .horizon { text-align:center; margin:0 0 18px; font-size:.9rem; color:var(--accent); }
@@ -106,8 +107,8 @@ function render(data){
 
   const horizon = document.getElementById('horizon');
   if (data.furthestBookable) {
-    const next = data.nextUnlockDate ? (' &middot; next date opens ~ ' + fmtDate(data.nextUnlockDate) + ' <span style="color:var(--muted)">(≈00:00 MYT)</span>') : '';
-    horizon.innerHTML = 'Bookable up to <b>' + fmtDate(data.furthestBookable) + '</b>' + next;
+    horizon.innerHTML = 'Bookable up to <b>' + fmtDate(data.furthestBookable) + '</b>' +
+      (data.bookingWindowDays != null ? ' (window ~' + data.bookingWindowDays + ' days)' : '');
   } else {
     horizon.textContent = 'No bookable dates in the scanned range yet.';
   }
@@ -121,10 +122,12 @@ function render(data){
     const status = diOpen
       ? '<span class="badge yes">DINE-IN OPEN</span>'
       : (taOpen ? '<span class="badge no">takeaway only</span>' : '<span class="badge no">closed</span>');
+    const diOpened = (diOpen && d.dineInOpenedAt) ? '<div class="opened">opened ' + d.dineInOpenedAt + '</div>' : '';
+    const taOpened = (taOpen && d.takeawayOpenedAt) ? '<div class="opened">opened ' + d.takeawayOpenedAt + '</div>' : '';
     const diSection = '<div class="label">Dine-in</div>' +
-      (diOpen ? '<div class="times">'+diTimes+'</div>' : '<div class="closed-note">No dine-in yet</div>');
+      (diOpen ? '<div class="times">'+diTimes+'</div>'+diOpened : '<div class="closed-note">No dine-in yet</div>');
     const taSection = '<div class="label">Takeaway</div>' +
-      (taOpen ? '<div class="times">'+taTimes+'</div>' : '<div class="closed-note">No takeaway</div>');
+      (taOpen ? '<div class="times">'+taTimes+'</div>'+taOpened : '<div class="closed-note">No takeaway</div>');
     const bookUrl = (data.bookingPage || 'https://reservation.umai.io/en/widget/rembayung')
       + '?party_size=' + (data.partySize || 3) + '&date=' + d.date;
     const book = (diOpen || taOpen)

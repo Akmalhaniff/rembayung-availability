@@ -6,7 +6,7 @@ on:
   workflow_dispatch:              # "Run workflow" button
   push:
     branches: [main]
-    paths-ignore: ['availability.json']   # avoid re-triggering on data commits
+    paths-ignore: ['availability.json', 'opened.json']   # avoid re-triggering on data commits
 
 # Needed to publish to GitHub Pages.
 permissions:
