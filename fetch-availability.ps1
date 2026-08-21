@@ -120,22 +120,23 @@ function Find-Categories($SlotsJson) {
         # An empty `slots` object means that session has no released/bookable slots yet
         # (even if its config looks "active"), so it must NOT be counted as open.
         if (-not $sl -or $sl.PSObject.Properties.Name.Count -eq 0) { continue }
-        # Only count sessions that actually have at least one open slot.
-        $hasOpen = $false
+        # Collect the exact open start times from the inventory.
+        $isTake = $nm -match 'takeaway|take away|bungkus|pickup'
+        $openTimes = @()
         foreach ($k in $sl.PSObject.Properties.Name) {
             foreach ($e in $sl.$k) {
                 $open = $e.spots_open
-                if (($null -eq $open) -or ($open -gt 0)) { $hasOpen = $true; break }
+                if (($null -eq $open) -or ($open -gt 0)) {
+                    $t = if ($e.start_time) { ($e.start_time -split ' ')[1] } else { $k }
+                    if ($t -match ':') { $t = $t.Substring(0,5) }
+                    $openTimes += $t
+                }
             }
-            if ($hasOpen) { break }
         }
-        if (-not $hasOpen) { continue }
-        $isTake = $nm -match 'takeaway|take away|bungkus|pickup'
-        $start = if ($ra -and $ra.start_time) { $ra.start_time } else { '' }
-        $end   = if ($ra -and $ra.end_time)   { $ra.end_time }   else { '' }
-        $win   = if ($start -and $end) { "$start-$end" } elseif ($start) { $start } else { 'available' }
-        $entry = [PSCustomObject]@{ Time = $win; Name = $nm; Open = $null }
-        if ($isTake) { $takeaway += $entry } else { $dineIn += $entry }
+        if ($openTimes.Count -eq 0) { continue }
+        foreach ($t in ($openTimes | Sort-Object -Unique)) {
+            if ($isTake) { $takeaway += $t } else { $dineIn += $t }
+        }
     }
     return @{ dineIn = $dineIn; takeaway = $takeaway }
 }
@@ -176,15 +177,15 @@ for ($i = 0; $i -lt $Days; $i++) {
         date          = $dateStr
         day           = $d.ToString('ddd')
         available     = $available
-        times         = @($times | ForEach-Object { $_.Time })
-        name          = if ($available) { $times[0].Name } else { '' }
+        times         = @($times)
+        name          = ''
         takeaway      = $takeawayAvail
-        takeawayTimes = @($takeTimes | ForEach-Object { $_.Time })
-        takeawayName  = if ($takeawayAvail) { $takeTimes[0].Name } else { '' }
+        takeawayTimes = @($takeTimes)
+        takeawayName  = ''
         note          = if (-not $available) { 'no dine-in yet' } else { '' }
     }
-    $di = if ($available) { "$($times.Count) dine-in: $($times.Time -join ', ')" } else { 'no dine-in' }
-    $ta = if ($takeawayAvail) { "$($takeTimes.Count) takeaway: $($takeTimes.Time -join ', ')" } else { 'no takeaway' }
+    $di = if ($available) { "$($times.Count) dine-in: $($times -join ', ')" } else { 'no dine-in' }
+    $ta = if ($takeawayAvail) { "$($takeTimes.Count) takeaway: $($takeTimes -join ', ')" } else { 'no takeaway' }
     if ($available) { Write-Host "  $dateStr : $di | $ta" -ForegroundColor Green }
     else            { Write-Host "  $dateStr : $di | $ta" }
 }
