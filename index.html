@@ -63,6 +63,16 @@ function fmtDate(s){
   return d.toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' });
 }
 
+function fmtTime(t){
+  if (!t || t.length < 5) return t;
+  const p = t.split(':');
+  let h = parseInt(p[0], 10);
+  const m = p[1];
+  const ap = h >= 12 ? 'PM' : 'AM';
+  let h12 = h % 12; if (h12 === 0) h12 = 12;
+  return h12 + ':' + m + ' ' + ap;
+}
+
 async function load(){
   try {
     const res = await fetch('availability.json', { cache:'no-store' });
@@ -96,8 +106,8 @@ function render(data){
     const diOpen = !!d.available, taOpen = !!d.takeaway;
     const card = document.createElement('div');
     card.className = 'card ' + (diOpen ? 'open' : (taOpen ? 'take' : 'closed'));
-    const diTimes = (d.times || []).map(t => '<span class="chip">'+t+'</span>').join('');
-    const taTimes = (d.takeawayTimes || []).map(t => '<span class="chip take">'+t+'</span>').join('');
+    const diTimes = (d.times || []).map(t => '<span class="chip">'+fmtTime(t)+'</span>').join('');
+    const taTimes = (d.takeawayTimes || []).map(t => '<span class="chip take">'+fmtTime(t)+'</span>').join('');
     const status = diOpen
       ? '<span class="badge yes">DINE-IN OPEN</span>'
       : (taOpen ? '<span class="badge no">takeaway only</span>' : '<span class="badge no">closed</span>');
