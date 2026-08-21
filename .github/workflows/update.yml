@@ -30,6 +30,9 @@ jobs:
 
       - name: Fetch availability (PowerShell)
         shell: pwsh
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: .\fetch-availability.ps1 -Days 14 -PartySize 3 -OutFile availability.json
 
       - name: Commit availability.json (for history)

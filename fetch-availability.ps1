@@ -2,17 +2,24 @@ param(
     [int]    $Days = 14,
     [int]    $PartySize = 3,
     [string] $OutFile = "availability.json",
+    [string] $TelegramToken = "",
+    [string] $TelegramChatId = "",
     [string] $ApiKeyFallback = "0e07c684-30c4-4212-9496-aee0e42231b4",
     [string] $LiveKeyUrl = "https://letsumai.com/e/tQ2dyw",
     [string] $BookingPage = "https://reservation.umai.io/en/widget/rembayung"
 )
 
-# Fetches Rembayung (UMAI) dine-in availability for the next $Days days and
-# writes a JSON file the website reads. Reuses the same API the widget uses.
+# Fetches Rembayung (UMAI) dine-in availability for the next $Days days, writes
+# availability.json, and (optionally) sends a Telegram alert when a date NEWLY
+# opens. Telegram creds come from params or env (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID).
 
 $ErrorActionPreference = 'Stop'
 $BaseUrl = "https://letsumai.com/widget/api"
 $Ua      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
+# Fall back to environment variables if params not supplied (used by GitHub Actions secrets).
+if (-not $TelegramToken)  { $TelegramToken  = $env:TELEGRAM_BOT_TOKEN }
+if (-not $TelegramChatId) { $TelegramChatId = $env:TELEGRAM_CHAT_ID }
 
 $script:ApiKey       = $null
 $script:AltchaToken  = $null
@@ -125,6 +132,16 @@ function Find-DineInTimes($SlotsJson) {
     return $out
 }
 
+function Send-Telegram($Token, $ChatId, $Msg) {
+    if (-not $Token -or -not $ChatId) { return }
+    try {
+        $text = [System.Uri]::EscapeDataString($Msg)
+        $u = "https://api.telegram.org/bot$Token/sendMessage?chat_id=$ChatId&text=$text"
+        Invoke-WebRequest -Uri $u -UseBasicParsing -TimeoutSec 20 | Out-Null
+        Write-Host "[telegram] sent"
+    } catch { Write-Host "[telegram] failed: $_" }
+}
+
 # ---------------- MAIN ----------------
 $key   = Get-ApiKey
 $token = Get-AltchaToken   # solve once up front so the first slots call carries it
@@ -154,6 +171,26 @@ for ($i = 0; $i -lt $Days; $i++) {
     }
     if ($available) { Write-Host "  $dateStr : $($times.Count) dine-in slot(s) -> $($times.Time -join ', ')" -ForegroundColor Green }
     else            { Write-Host "  $dateStr : none" }
+}
+
+# Detect dates that just opened (compared to the previous availability.json).
+$prevAvail = @{}
+if (Test-Path $OutFile) {
+    try {
+        $prev = (Get-Content $OutFile -Raw | ConvertFrom-Json)
+        foreach ($pd in $prev.dates) { $prevAvail[$pd.date] = $pd.available }
+    } catch { Write-Host "[prev] could not read previous data: $_" }
+}
+$newlyOpen = $results | Where-Object { $_.available -and $prevAvail[$_.date] -ne $true }
+if ($newlyOpen.Count -gt 0) {
+    Write-Host "*** $($newlyOpen.Count) newly-open date(s) -> sending Telegram ***"
+    foreach ($d in $newlyOpen) {
+        $msg = "Rembayung DINE-IN OPEN`nDate: $($d.date) ($($d.day))`nTimes: $(($d.times -join ', '))`nBook: $BookingPage"
+        Write-Host $msg
+        Send-Telegram $TelegramToken $TelegramChatId $msg
+    }
+} else {
+    Write-Host "No newly-opened dates since last check."
 }
 
 $out = [PSCustomObject]@{

@@ -22,11 +22,13 @@ no PC left running, no database.
    - `index.html`
    - `fetch-availability.ps1`
    - `.github/workflows/update.yml`  (keep the folder structure)
-4. Enable GitHub Pages:
-   - Repo **Settings → Pages → Build and deployment → Source: "Deploy from a
-     branch"**, then choose **main** / **/ (root)** and Save.
-5. Go to the **Actions** tab and you should see the workflow start (or click
-   "Run workflow"). Within a minute or two it creates `availability.json`.
+4. GitHub Pages is published automatically by the workflow (it uses the
+   official Pages deploy action), so make sure Pages is set to:
+   **Settings → Pages → Build and deployment → Source: "GitHub Actions"**.
+   (That's the default when you created the site; no branch selection needed.)
+5. Go to the **Actions** tab, open **Update Rembayung availability**, and click
+   **Run workflow** once to publish immediately. After that it runs on its own
+   every 15 minutes.
 6. Open your site:
    ```
    https://<your-username>.github.io/<repo-name>/
@@ -41,7 +43,7 @@ with the available times and a "Book on UMAI" link.
 - **Party size / how many days to scan:** edit the arguments in
   `.github/workflows/update.yml`:
   ```yaml
-  run: .\fetch-availability.ps1 -Days 60 -PartySize 3 -OutFile availability.json
+   run: .\fetch-availability.ps1 -Days 14 -PartySize 3 -OutFile availability.json
   ```
   (you can also just edit the defaults at the top of `fetch-availability.ps1`).
 
@@ -57,6 +59,28 @@ with the available times and a "Book on UMAI" link.
   ```
   (to view the HTML locally you need a tiny static server, because browsers
   block `fetch()` on `file://`; the GitHub Pages URL avoids this).
+
+## Telegram alerts from the cloud (recommended)
+
+Get pinged the moment a date *newly* opens — no PC running needed. The workflow
+sends a Telegram message only when a date transitions from closed → open.
+
+1. Message [@BotFather](https://t.me/BotFather) on Telegram, create a bot with
+   `/newbot`, and copy the **bot token** it gives you.
+2. Get your **chat ID**. Easiest way: message [@RawDataBot](https://t.me/RawDataBot)
+   (or any "user ID" bot) and copy the `chat.id` / `user.id` number.
+3. In your GitHub repo go to **Settings → Secrets and variables → Actions → New
+   repository secret** and add two secrets:
+   - `TELEGRAM_BOT_TOKEN` = the token from step 1
+   - `TELEGRAM_CHAT_ID` = the chat id from step 2
+4. That's it — the next workflow run (every 15 min) picks them up automatically.
+   When a new date opens you'll get a Telegram message like:
+   ```
+   Rembayung DINE-IN OPEN
+   Date: 2026-09-03 (Thu)
+   Times: 18:00, 18:30, 19:00
+   Book: https://reservation.umai.io/en/widget/rembayung
+   ```
 
 ## Want phone notifications too?
 
