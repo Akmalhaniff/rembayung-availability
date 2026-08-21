@@ -72,26 +72,35 @@ function render(data){
   document.getElementById('updated').textContent =
     'Last updated: ' + data.lastUpdated + (data.partySize ? '  ·  Party of ' + data.partySize : '');
 
-  const open = (data.dates || []).filter(d => d.available);
+  const dates = data.dates || [];
+  const open = dates.filter(d => d.available);
   const summary = document.getElementById('summary');
   summary.innerHTML = open.length
-    ? '🎉 <b>' + open.length + '</b> date' + (open.length>1?'s':'') + ' with dine-in openings'
-    : 'No dine-in openings right now';
+    ? '🎉 <b>' + open.length + '</b> of ' + dates.length + ' day' + (dates.length>1?'s':'') + ' with dine-in openings'
+    : 'No dine-in openings in the next ' + dates.length + ' days';
 
   const list = document.getElementById('list');
   list.innerHTML = '';
-  document.getElementById('empty').style.display = open.length ? 'none' : 'block';
+  document.getElementById('empty').style.display = 'none';
 
-  open.forEach(d => {
+  dates.forEach(d => {
     const card = document.createElement('div');
-    card.className = 'card open';
+    card.className = 'card ' + (d.available ? 'open' : 'closed');
     const times = (d.times || []).map(t => '<span class="chip">'+t+'</span>').join('');
+    const status = d.available
+      ? '<span class="badge yes">OPEN</span>'
+      : '<span class="badge no">no dine-in</span>';
+    const note = d.available ? '' :
+      '<div class="day">Takeaway may be available — dine-in is not open yet.</div>';
+    const book = d.available
+      ? '<a class="book" href="'+ (data.bookingPage||'#') +'" target="_blank" rel="noopener">Book on UMAI &rarr;</a>'
+      : '';
     card.innerHTML =
-      '<div class="top"><span class="date">'+fmtDate(d.date)+'</span>'+
-      '<span class="badge yes">OPEN</span></div>'+
+      '<div class="top"><span class="date">'+fmtDate(d.date)+'</span>'+ status +'</div>'+
       '<div class="day">'+ (d.day||'') +'</div>'+
-      '<div class="times">'+times+'</div>'+
-      '<a class="book" href="'+ (data.bookingPage||'#') +'" target="_blank" rel="noopener">Book on UMAI &rarr;</a>';
+      note +
+      (times ? '<div class="times">'+times+'</div>' : '') +
+      book;
     list.appendChild(card);
   });
 }

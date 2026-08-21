@@ -1,5 +1,5 @@
 param(
-    [int]    $Days = 60,
+    [int]    $Days = 14,
     [int]    $PartySize = 3,
     [string] $OutFile = "availability.json",
     [string] $ApiKeyFallback = "0e07c684-30c4-4212-9496-aee0e42231b4",

@@ -30,7 +30,7 @@ jobs:
 
       - name: Fetch availability (PowerShell)
         shell: pwsh
-        run: .\fetch-availability.ps1 -Days 60 -PartySize 3 -OutFile availability.json
+        run: .\fetch-availability.ps1 -Days 14 -PartySize 3 -OutFile availability.json
 
       - name: Commit availability.json (for history)
         shell: bash
