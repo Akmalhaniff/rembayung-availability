@@ -2,15 +2,28 @@ name: Update Rembayung availability
 
 on:
   schedule:
-    - cron: '*/15 * * * *'   # every 15 minutes (UTC)
-  workflow_dispatch:         # allows manual "Run workflow" button
+    - cron: '*/15 * * * *'        # every 15 minutes (UTC)
+  workflow_dispatch:              # "Run workflow" button
+  push:
+    branches: [main]
+    paths-ignore: ['availability.json']   # avoid re-triggering on data commits
 
+# Needed to publish to GitHub Pages.
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment.
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  update:
+  build-and-deploy:
     runs-on: windows-latest
+    environment:
+      name: github-pages
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,7 +32,7 @@ jobs:
         shell: pwsh
         run: .\fetch-availability.ps1 -Days 60 -PartySize 3 -OutFile availability.json
 
-      - name: Commit & push availability.json
+      - name: Commit availability.json (for history)
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -27,8 +40,16 @@ jobs:
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           git add availability.json
           if git diff --cached --quiet; then
-            echo "No changes to availability.json"
+            echo "No change to availability.json"
           else
-            git commit -m "Update availability $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git commit -m "data $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             git push
           fi
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .          # serves index.html + availability.json (static)
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
