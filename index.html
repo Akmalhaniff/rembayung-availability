@@ -17,7 +17,8 @@
   .summary b { color:var(--ok); }
   .card { background:var(--card); border-radius:14px; padding:14px 16px; margin:10px 0;
           box-shadow:0 1px 3px rgba(0,0,0,.4); }
-  .card.open { border-left:4px solid var(--ok); }
+  .card.open { border-left:4px solid var(--ok); cursor:pointer; }
+  .card.open:hover { background:#20242c; }
   .card.closed { opacity:.55; }
   .card .top { display:flex; justify-content:space-between; align-items:baseline; }
   .date { font-weight:600; font-size:1.1rem; }
@@ -92,8 +93,10 @@ function render(data){
       : '<span class="badge no">no dine-in</span>';
     const note = d.available ? '' :
       '<div class="day">Takeaway may be available — dine-in is not open yet.</div>';
+    const bookUrl = (data.bookingPage || 'https://reservation.umai.io/en/widget/rembayung')
+      + '?party_size=' + (data.partySize || 3) + '&date=' + d.date;
     const book = d.available
-      ? '<a class="book" href="'+ (data.bookingPage||'#') +'" target="_blank" rel="noopener">Book on UMAI &rarr;</a>'
+      ? '<a class="book" href="'+ bookUrl +'" target="_blank" rel="noopener">Book this date on UMAI &rarr;</a>'
       : '';
     card.innerHTML =
       '<div class="top"><span class="date">'+fmtDate(d.date)+'</span>'+ status +'</div>'+
@@ -101,6 +104,12 @@ function render(data){
       note +
       (times ? '<div class="times">'+times+'</div>' : '') +
       book;
+    if (d.available) {
+      card.onclick = function(e){
+        if (e.target.tagName === 'A') return;   // let the link handle its own click
+        window.open(bookUrl, '_blank', 'noopener');
+      };
+    }
     list.appendChild(card);
   });
 }

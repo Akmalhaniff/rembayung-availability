@@ -185,7 +185,8 @@ $newlyOpen = $results | Where-Object { $_.available -and $prevAvail[$_.date] -ne
 if ($newlyOpen.Count -gt 0) {
     Write-Host "*** $($newlyOpen.Count) newly-open date(s) -> sending Telegram ***"
     foreach ($d in $newlyOpen) {
-        $msg = "Rembayung DINE-IN OPEN`nDate: $($d.date) ($($d.day))`nTimes: $(($d.times -join ', '))`nBook: $BookingPage"
+        $bookUrl = "$BookingPage`?party_size=$PartySize&date=$($d.date)"
+        $msg = "Rembayung DINE-IN OPEN`nDate: $($d.date) ($($d.day))`nTimes: $(($d.times -join ', '))`nBook: $bookUrl"
         Write-Host $msg
         Send-Telegram $TelegramToken $TelegramChatId $msg
     }

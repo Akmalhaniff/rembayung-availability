@@ -79,7 +79,7 @@ sends a Telegram message only when a date transitions from closed → open.
    Rembayung DINE-IN OPEN
    Date: 2026-09-03 (Thu)
    Times: 18:00, 18:30, 19:00
-   Book: https://reservation.umai.io/en/widget/rembayung
+   Book: https://reservation.umai.io/en/widget/rembayung?party_size=3&date=2026-09-03
    ```
 
 ## Want phone notifications too?
