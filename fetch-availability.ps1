@@ -1,0 +1,167 @@
+param(
+    [int]    $Days = 60,
+    [int]    $PartySize = 3,
+    [string] $OutFile = "availability.json",
+    [string] $ApiKeyFallback = "0e07c684-30c4-4212-9496-aee0e42231b4",
+    [string] $LiveKeyUrl = "https://letsumai.com/e/tQ2dyw",
+    [string] $BookingPage = "https://reservation.umai.io/en/widget/rembayung"
+)
+
+# Fetches Rembayung (UMAI) dine-in availability for the next $Days days and
+# writes a JSON file the website reads. Reuses the same API the widget uses.
+
+$ErrorActionPreference = 'Stop'
+$BaseUrl = "https://letsumai.com/widget/api"
+$Ua      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
+$script:ApiKey       = $null
+$script:AltchaToken  = $null
+$script:AltchaExpire = 0
+
+function Get-ApiKey {
+    if ($script:ApiKey) { return $script:ApiKey }
+    try {
+        $src = (Invoke-WebRequest -Uri $LiveKeyUrl -UseBasicParsing -TimeoutSec 20 -UserAgent $Ua).Content
+        $m = [regex]::Match($src, 'widgetApiKey[\s\S]{0,2000}?([A-Za-z0-9-]{20,})')
+        if ($m.Success -and $m.Groups[1].Value.Length -ge 20) {
+            $script:ApiKey = $m.Groups[1].Value
+            Write-Host "[key] live key: $($script:ApiKey.Substring(0,12))..."
+            return $script:ApiKey
+        }
+    } catch { Write-Host "[key] live fetch failed: $_" }
+    $script:ApiKey = $ApiKeyFallback
+    Write-Host "[key] using fallback key"
+    return $script:ApiKey
+}
+
+function Get-AltchaToken {
+    if ($script:AltchaToken -and [datetime]::UtcNow.Ticks -lt $script:AltchaExpire) {
+        return $script:AltchaToken
+    }
+    $key = Get-ApiKey
+    $ch  = Http-Json -Method GET -Path "v2/altcha/challenge" -Key $key
+    $salt = $ch.salt; $target = $ch.challenge; $sig = $ch.signature
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $enc = [System.Text.Encoding]::UTF8
+    $found = $null
+    for ($n = 0; $n -lt 6000000; $n++) {
+        $h = [BitConverter]::ToString($sha.ComputeHash($enc.GetBytes("$salt$n"))).Replace('-', '')
+        if ($h -eq $target) { $found = $n; break }
+    }
+    if ($null -eq $found) { throw "ALTCHA unsolved" }
+    $sol = @{ algorithm='SHA-256'; salt=$salt; number=$found; challenge=$target; signature=$sig } | ConvertTo-Json -Compress
+    $solB64 = [Convert]::ToBase64String($enc.GetBytes($sol))
+    $vk = Http-Json -Method POST -Path "v2/altcha/verify" -Key $key -BodyBytes $enc.GetBytes((@{ solution=$solB64 } | ConvertTo-Json -Compress))
+    $script:AltchaToken = $vk.token
+    $script:AltchaExpire = [datetime]::UtcNow.AddSeconds(900).Ticks
+    Write-Host "[altcha] solved at $found, token ok"
+    return $script:AltchaToken
+}
+
+function Http-Json {
+    param($Method, $Path, $Key, $BodyBytes, $Token)
+    $req = [System.Net.HttpWebRequest]::Create("$BaseUrl/$Path")
+    $req.Method = $Method; $req.UserAgent = $Ua; $req.Accept = 'application/json'
+    $req.Referer = $BookingPage
+    $req.Headers.Add('Origin', 'https://reservation.umai.io')
+    $req.Headers.Add('VENUE-API-KEY', $Key)
+    if ($Token) { $req.Headers.Add('X-Altcha-Token', $Token) }
+    $req.Timeout = 20000
+    if ($BodyBytes) {
+        $req.ContentType = 'application/json'
+        $rs = $req.GetRequestStream(); $rs.Write($BodyBytes, 0, $BodyBytes.Length); $rs.Close()
+    }
+    try { $res = $req.GetResponse() }
+    catch [System.Net.WebException] { $res = $_.Exception.Response }
+    $sr = New-Object System.IO.StreamReader($res.GetResponseStream())
+    $txt = $sr.ReadToEnd()
+    if ($res.StatusCode -ne 200 -and $res.StatusCode -ne 201) {
+        throw "HTTP $($res.StatusCode) on $Path : $txt"
+    }
+    return ($txt | ConvertFrom-Json)
+}
+
+function Get-Slots($Key, $Date, $Token) {
+    $path = "v2/slots?party_size=$PartySize&date=$Date"
+    $tok = $Token
+    if (-not $tok) {
+        if ($script:AltchaToken -and [datetime]::UtcNow.Ticks -lt $script:AltchaExpire) {
+            $tok = $script:AltchaToken
+        }
+    }
+    try {
+        return (Http-Json -Method GET -Path $path -Key $Key -Token $tok)
+    } catch {
+        if ($_.Exception.Message -match '40\d') {
+            Write-Host "[slots] verification required, solving ALTCHA..."
+            $tok = Get-AltchaToken
+            return (Http-Json -Method GET -Path $path -Key $Key -Token $tok)
+        }
+        throw
+    }
+}
+
+function Find-DineInTimes($SlotsJson) {
+    $out = @()
+    if (-not $SlotsJson) { return $out }
+    foreach ($grp in $SlotsJson) {
+        if ($grp -isnot [PSCustomObject]) { continue }
+        $ra = $grp.reservation_availability
+        $nm = if ($ra) { $ra.name } else { '' }
+        if ($nm -match 'takeaway|take away|bungkus|pickup') { continue }
+        $sl = $grp.slots
+        if ($sl) {
+            foreach ($k in $sl.PSObject.Properties.Name) {
+                foreach ($e in $sl.$k) {
+                    $open = $e.spots_open
+                    if (($null -eq $open) -or ($open -gt 0)) {
+                        $t = ($e.start_time -split ' ')[1]
+                        $out += [PSCustomObject]@{ Time = $t; Name = $nm; Open = $open }
+                    }
+                }
+            }
+        }
+    }
+    return $out
+}
+
+# ---------------- MAIN ----------------
+$key   = Get-ApiKey
+$token = Get-AltchaToken   # solve once up front so the first slots call carries it
+$start = Get-Date
+$results = @()
+
+Write-Host "Scanning next $Days days (party of $PartySize, dine-in only)..."
+for ($i = 0; $i -lt $Days; $i++) {
+    $d = $start.AddDays($i)
+    $dateStr = $d.ToString('yyyy-MM-dd')
+    try {
+        $slots = Get-Slots -Key $key -Date $dateStr -Token $token
+        $times = Find-DineInTimes $slots
+    } catch {
+        Write-Host "  $dateStr : error ($_)"
+        $results += [PSCustomObject]@{ date=$dateStr; day=$d.ToString('ddd'); available=$false; times=@(); name=''; note='error' }
+        continue
+    }
+    $available = $times.Count -gt 0
+    $results += [PSCustomObject]@{
+        date      = $dateStr
+        day       = $d.ToString('ddd')
+        available = $available
+        times     = @($times | ForEach-Object { $_.Time })
+        name      = if ($available) { $times[0].Name } else { '' }
+        note      = if (-not $available) { 'no dine-in yet' } else { '' }
+    }
+    if ($available) { Write-Host "  $dateStr : $($times.Count) dine-in slot(s) -> $($times.Time -join ', ')" -ForegroundColor Green }
+    else            { Write-Host "  $dateStr : none" }
+}
+
+$out = [PSCustomObject]@{
+    lastUpdated = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    partySize   = $PartySize
+    note        = 'Times shown are DINE-IN only (takeaway is ignored).'
+    bookingPage = $BookingPage
+    dates       = $results
+}
+$out | ConvertTo-Json -Depth 4 | Set-Content -Path $OutFile -Encoding UTF8
+Write-Host "Wrote $OutFile ($($results.Count) dates)."

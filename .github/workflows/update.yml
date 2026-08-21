@@ -1,0 +1,34 @@
+name: Update Rembayung availability
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # every 15 minutes (UTC)
+  workflow_dispatch:         # allows manual "Run workflow" button
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch availability (PowerShell)
+        shell: pwsh
+        run: .\fetch-availability.ps1 -Days 60 -PartySize 3 -OutFile availability.json
+
+      - name: Commit & push availability.json
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git add availability.json
+          if git diff --cached --quiet; then
+            echo "No changes to availability.json"
+          else
+            git commit -m "Update availability $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi
