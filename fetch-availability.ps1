@@ -115,12 +115,21 @@ function Find-Categories($SlotsJson) {
         if ($grp -isnot [PSCustomObject]) { continue }
         $ra = $grp.reservation_availability
         $nm = if ($ra) { $ra.name } else { '' }
-        # A session is bookable when it is NOT explicitly closed / sold-out / past the booking window.
-        # (The API does not return per-slot inventory here; the widget computes times from the
-        #  session's start_time/end_time window, so we use those flags as the open signal.)
-        $bookable = ($grp.no_slots -ne $true) -and ($grp.closed -ne $true) -and `
-                    ($grp.date_exceeds_allowed_date -ne $true) -and ($grp.no_availability -ne $true)
-        if (-not $bookable) { continue }
+        $sl = $grp.slots
+        # The REAL availability signal is whether the API returned actual slot inventory.
+        # An empty `slots` object means that session has no released/bookable slots yet
+        # (even if its config looks "active"), so it must NOT be counted as open.
+        if (-not $sl -or $sl.PSObject.Properties.Name.Count -eq 0) { continue }
+        # Only count sessions that actually have at least one open slot.
+        $hasOpen = $false
+        foreach ($k in $sl.PSObject.Properties.Name) {
+            foreach ($e in $sl.$k) {
+                $open = $e.spots_open
+                if (($null -eq $open) -or ($open -gt 0)) { $hasOpen = $true; break }
+            }
+            if ($hasOpen) { break }
+        }
+        if (-not $hasOpen) { continue }
         $isTake = $nm -match 'takeaway|take away|bungkus|pickup'
         $start = if ($ra -and $ra.start_time) { $ra.start_time } else { '' }
         $end   = if ($ra -and $ra.end_time)   { $ra.end_time }   else { '' }
