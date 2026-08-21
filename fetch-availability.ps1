@@ -115,20 +115,18 @@ function Find-Categories($SlotsJson) {
         if ($grp -isnot [PSCustomObject]) { continue }
         $ra = $grp.reservation_availability
         $nm = if ($ra) { $ra.name } else { '' }
+        # A session is bookable when it is NOT explicitly closed / sold-out / past the booking window.
+        # (The API does not return per-slot inventory here; the widget computes times from the
+        #  session's start_time/end_time window, so we use those flags as the open signal.)
+        $bookable = ($grp.no_slots -ne $true) -and ($grp.closed -ne $true) -and `
+                    ($grp.date_exceeds_allowed_date -ne $true) -and ($grp.no_availability -ne $true)
+        if (-not $bookable) { continue }
         $isTake = $nm -match 'takeaway|take away|bungkus|pickup'
-        $target = if ($isTake) { $takeaway } else { $dineIn }
-        $sl = $grp.slots
-        if ($sl) {
-            foreach ($k in $sl.PSObject.Properties.Name) {
-                foreach ($e in $sl.$k) {
-                    $open = $e.spots_open
-                    if (($null -eq $open) -or ($open -gt 0)) {
-                        $t = ($e.start_time -split ' ')[1]
-                        $target += [PSCustomObject]@{ Time = $t; Name = $nm; Open = $open }
-                    }
-                }
-            }
-        }
+        $start = if ($ra -and $ra.start_time) { $ra.start_time } else { '' }
+        $end   = if ($ra -and $ra.end_time)   { $ra.end_time }   else { '' }
+        $win   = if ($start -and $end) { "$start-$end" } elseif ($start) { $start } else { 'available' }
+        $entry = [PSCustomObject]@{ Time = $win; Name = $nm; Open = $null }
+        if ($isTake) { $takeaway += $entry } else { $dineIn += $entry }
     }
     return @{ dineIn = $dineIn; takeaway = $takeaway }
 }
