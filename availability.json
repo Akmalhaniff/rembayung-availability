@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-21 04:27:15",
+  "lastUpdated": "2026-08-21 04:32:07",
   "partySize": 3,
   "note": "Dine-in and takeaway are shown separately.",
   "bookingPage": "https://reservation.umai.io/en/widget/rembayung",
@@ -18,116 +18,68 @@
     {
       "date": "2026-08-22",
       "day": "Sat",
-      "available": true,
-      "times": [
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "Dine In   First Session",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:15-13:00",
-        "18:15-19:00"
-      ],
-      "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "available": false,
+      "times": [],
+      "name": "",
+      "takeaway": false,
+      "takeawayTimes": [],
+      "takeawayName": "",
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-08-23",
       "day": "Sun",
-      "available": true,
-      "times": [
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "Dine In   First Session",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:15-13:00",
-        "18:15-19:00"
-      ],
-      "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "available": false,
+      "times": [],
+      "name": "",
+      "takeaway": false,
+      "takeawayTimes": [],
+      "takeawayName": "",
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-08-24",
       "day": "Mon",
-      "available": true,
-      "times": [
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "Dine In   First Session",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:15-13:00",
-        "18:15-19:00"
-      ],
-      "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "available": false,
+      "times": [],
+      "name": "",
+      "takeaway": false,
+      "takeawayTimes": [],
+      "takeawayName": "",
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-08-25",
       "day": "Tue",
-      "available": true,
-      "times": [
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "Dine In   First Session",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:15-13:00",
-        "18:15-19:00"
-      ],
-      "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "available": false,
+      "times": [],
+      "name": "",
+      "takeaway": false,
+      "takeawayTimes": [],
+      "takeawayName": "",
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-08-26",
       "day": "Wed",
-      "available": true,
-      "times": [
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "Dine In   First Session",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:15-13:00",
-        "18:15-19:00"
-      ],
-      "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "available": false,
+      "times": [],
+      "name": "",
+      "takeaway": false,
+      "takeawayTimes": [],
+      "takeawayName": "",
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-08-27",
       "day": "Thu",
-      "available": true,
-      "times": [
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "Dine In   First Session",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:15-13:00",
-        "18:15-19:00"
-      ],
-      "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "available": false,
+      "times": [],
+      "name": "",
+      "takeaway": false,
+      "takeawayTimes": [],
+      "takeawayName": "",
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-08-28",
@@ -143,119 +95,77 @@
     {
       "date": "2026-08-29",
       "day": "Sat",
-      "available": true,
-      "times": [
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "Dine In   First Session",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:15-13:00",
-        "18:15-19:00"
-      ],
-      "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "available": false,
+      "times": [],
+      "name": "",
+      "takeaway": false,
+      "takeawayTimes": [],
+      "takeawayName": "",
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-08-30",
       "day": "Sun",
-      "available": true,
-      "times": [
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "Dine In   First Session",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:15-13:00",
-        "18:15-19:00"
-      ],
-      "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "available": false,
+      "times": [],
+      "name": "",
+      "takeaway": false,
+      "takeawayTimes": [],
+      "takeawayName": "",
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-08-31",
       "day": "Mon",
-      "available": true,
-      "times": [
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "Dine In   First Session",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:15-13:00",
-        "18:15-19:00"
-      ],
-      "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "available": false,
+      "times": [],
+      "name": "",
+      "takeaway": false,
+      "takeawayTimes": [],
+      "takeawayName": "",
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-09-01",
       "day": "Tue",
-      "available": true,
-      "times": [
-        "available",
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "All Day",
+      "available": false,
+      "times": [],
+      "name": "",
       "takeaway": true,
       "takeawayTimes": [
         "12:15-13:00",
         "18:15-19:00"
       ],
       "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-09-02",
       "day": "Wed",
-      "available": true,
-      "times": [
-        "available",
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "All Day",
+      "available": false,
+      "times": [],
+      "name": "",
       "takeaway": true,
       "takeawayTimes": [
         "12:15-13:00",
         "18:15-19:00"
       ],
       "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "note": "no dine-in yet"
     },
     {
       "date": "2026-09-03",
       "day": "Thu",
-      "available": true,
-      "times": [
-        "available",
-        "11:00-12:15",
-        "13:45-15:00",
-        "16:30-19:30",
-        "20:00-23:00"
-      ],
-      "name": "All Day",
+      "available": false,
+      "times": [],
+      "name": "",
       "takeaway": true,
       "takeawayTimes": [
         "12:15-13:00",
         "18:15-19:00"
       ],
       "takeawayName": "❗️❗️takeaway ❗️❗️  Takeaway Sahaja, Tiada Dine In",
-      "note": ""
+      "note": "no dine-in yet"
     }
   ]
 }
