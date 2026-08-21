@@ -108,14 +108,15 @@ function Get-Slots($Key, $Date, $Token) {
     }
 }
 
-function Find-DineInTimes($SlotsJson) {
-    $out = @()
-    if (-not $SlotsJson) { return $out }
+function Find-Categories($SlotsJson) {
+    $dineIn = @(); $takeaway = @()
+    if (-not $SlotsJson) { return @{ dineIn = $dineIn; takeaway = $takeaway } }
     foreach ($grp in $SlotsJson) {
         if ($grp -isnot [PSCustomObject]) { continue }
         $ra = $grp.reservation_availability
         $nm = if ($ra) { $ra.name } else { '' }
-        if ($nm -match 'takeaway|take away|bungkus|pickup') { continue }
+        $isTake = $nm -match 'takeaway|take away|bungkus|pickup'
+        $target = if ($isTake) { $takeaway } else { $dineIn }
         $sl = $grp.slots
         if ($sl) {
             foreach ($k in $sl.PSObject.Properties.Name) {
@@ -123,13 +124,13 @@ function Find-DineInTimes($SlotsJson) {
                     $open = $e.spots_open
                     if (($null -eq $open) -or ($open -gt 0)) {
                         $t = ($e.start_time -split ' ')[1]
-                        $out += [PSCustomObject]@{ Time = $t; Name = $nm; Open = $open }
+                        $target += [PSCustomObject]@{ Time = $t; Name = $nm; Open = $open }
                     }
                 }
             }
         }
     }
-    return $out
+    return @{ dineIn = $dineIn; takeaway = $takeaway }
 }
 
 function Send-Telegram($Token, $ChatId, $Msg) {
@@ -148,29 +149,37 @@ $token = Get-AltchaToken   # solve once up front so the first slots call carries
 $start = Get-Date
 $results = @()
 
-Write-Host "Scanning next $Days days (party of $PartySize, dine-in only)..."
+Write-Host "Scanning next $Days days (party of $PartySize) for dine-in and takeaway..."
 for ($i = 0; $i -lt $Days; $i++) {
     $d = $start.AddDays($i)
     $dateStr = $d.ToString('yyyy-MM-dd')
     try {
         $slots = Get-Slots -Key $key -Date $dateStr -Token $token
-        $times = Find-DineInTimes $slots
+        $cat = Find-Categories $slots
+        $times = $cat.dineIn
+        $takeTimes = $cat.takeaway
     } catch {
         Write-Host "  $dateStr : error ($_)"
-        $results += [PSCustomObject]@{ date=$dateStr; day=$d.ToString('ddd'); available=$false; times=@(); name=''; note='error' }
+        $results += [PSCustomObject]@{ date=$dateStr; day=$d.ToString('ddd'); available=$false; times=@(); name=''; takeaway=$false; takeawayTimes=@(); takeawayName=''; note='error' }
         continue
     }
     $available = $times.Count -gt 0
+    $takeawayAvail = $takeTimes.Count -gt 0
     $results += [PSCustomObject]@{
-        date      = $dateStr
-        day       = $d.ToString('ddd')
-        available = $available
-        times     = @($times | ForEach-Object { $_.Time })
-        name      = if ($available) { $times[0].Name } else { '' }
-        note      = if (-not $available) { 'no dine-in yet' } else { '' }
+        date          = $dateStr
+        day           = $d.ToString('ddd')
+        available     = $available
+        times         = @($times | ForEach-Object { $_.Time })
+        name          = if ($available) { $times[0].Name } else { '' }
+        takeaway      = $takeawayAvail
+        takeawayTimes = @($takeTimes | ForEach-Object { $_.Time })
+        takeawayName  = if ($takeawayAvail) { $takeTimes[0].Name } else { '' }
+        note          = if (-not $available) { 'no dine-in yet' } else { '' }
     }
-    if ($available) { Write-Host "  $dateStr : $($times.Count) dine-in slot(s) -> $($times.Time -join ', ')" -ForegroundColor Green }
-    else            { Write-Host "  $dateStr : none" }
+    $di = if ($available) { "$($times.Count) dine-in: $($times.Time -join ', ')" } else { 'no dine-in' }
+    $ta = if ($takeawayAvail) { "$($takeTimes.Count) takeaway: $($takeTimes.Time -join ', ')" } else { 'no takeaway' }
+    if ($available) { Write-Host "  $dateStr : $di | $ta" -ForegroundColor Green }
+    else            { Write-Host "  $dateStr : $di | $ta" }
 }
 
 # Detect dates that just opened (compared to the previous availability.json).
@@ -197,7 +206,7 @@ if ($newlyOpen.Count -gt 0) {
 $out = [PSCustomObject]@{
     lastUpdated = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
     partySize   = $PartySize
-    note        = 'Times shown are DINE-IN only (takeaway is ignored).'
+    note        = 'Dine-in and takeaway are shown separately.'
     bookingPage = $BookingPage
     dates       = $results
 }

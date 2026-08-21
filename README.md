@@ -7,7 +7,7 @@ no PC left running, no database.
 ## What's in here
 
 - `index.html` — the website. Fetches `availability.json` and lists every
-  date that currently has open dine-in slots (takeaway is ignored).
+  date with its **dine-in** and **takeaway** availability shown separately.
 - `fetch-availability.ps1` — PowerShell script that queries the UMAI API
   (same API the booking widget uses) and writes `availability.json`.
 - `.github/workflows/update.yml` — GitHub Action that runs the script every

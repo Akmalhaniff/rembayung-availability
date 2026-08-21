@@ -19,6 +19,8 @@
           box-shadow:0 1px 3px rgba(0,0,0,.4); }
   .card.open { border-left:4px solid var(--ok); cursor:pointer; }
   .card.open:hover { background:#20242c; }
+  .card.take { border-left:4px solid #5dade2; cursor:pointer; }
+  .card.take:hover { background:#20242c; }
   .card.closed { opacity:.55; }
   .card .top { display:flex; justify-content:space-between; align-items:baseline; }
   .date { font-weight:600; font-size:1.1rem; }
@@ -29,6 +31,9 @@
   .times { margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; }
   .chip { background:rgba(230,126,34,.15); color:var(--accent); border-radius:8px;
           padding:4px 10px; font-size:.9rem; }
+  .chip.take { background:rgba(52,152,219,.15); color:#5dade2; }
+  .label { margin-top:10px; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  .closed-note { color:var(--muted); font-size:.85rem; margin-top:2px; }
   .book { display:inline-block; margin-top:10px; color:var(--accent); text-decoration:none; font-weight:600; }
   .empty { text-align:center; color:var(--muted); margin-top:30px; }
   footer { text-align:center; color:var(--muted); font-size:.75rem; padding:0 16px 30px; }
@@ -47,7 +52,7 @@
 </main>
 <footer>
   Auto-refreshes every minute &middot; data is recomputed on the server every 5 min.<br/>
-  Takeaway slots are ignored &mdash; this shows <b>dine-in</b> only.
+  Dine-in and takeaway are shown separately &mdash; orange = dine-in, blue = takeaway.
 </footer>
 
 <script>
@@ -75,36 +80,42 @@ function render(data){
 
   const dates = data.dates || [];
   const open = dates.filter(d => d.available);
+  const take = dates.filter(d => d.takeaway);
   const summary = document.getElementById('summary');
-  summary.innerHTML = open.length
-    ? '🎉 <b>' + open.length + '</b> of ' + dates.length + ' day' + (dates.length>1?'s':'') + ' with dine-in openings'
-    : 'No dine-in openings in the next ' + dates.length + ' days';
+  summary.innerHTML = (open.length || take.length)
+    ? '🎉 <b>' + open.length + '</b> dine-in' + (open.length===1?'':'s') +
+      ' &middot; <b>' + take.length + '</b> takeaway open' +
+      ' (of ' + dates.length + ' days)'
+    : 'No dine-in or takeaway openings in the next ' + dates.length + ' days';
 
   const list = document.getElementById('list');
   list.innerHTML = '';
   document.getElementById('empty').style.display = 'none';
 
   dates.forEach(d => {
+    const diOpen = !!d.available, taOpen = !!d.takeaway;
     const card = document.createElement('div');
-    card.className = 'card ' + (d.available ? 'open' : 'closed');
-    const times = (d.times || []).map(t => '<span class="chip">'+t+'</span>').join('');
-    const status = d.available
-      ? '<span class="badge yes">OPEN</span>'
-      : '<span class="badge no">no dine-in</span>';
-    const note = d.available ? '' :
-      '<div class="day">Takeaway may be available — dine-in is not open yet.</div>';
+    card.className = 'card ' + (diOpen ? 'open' : (taOpen ? 'take' : 'closed'));
+    const diTimes = (d.times || []).map(t => '<span class="chip">'+t+'</span>').join('');
+    const taTimes = (d.takeawayTimes || []).map(t => '<span class="chip take">'+t+'</span>').join('');
+    const status = diOpen
+      ? '<span class="badge yes">DINE-IN OPEN</span>'
+      : (taOpen ? '<span class="badge no">takeaway only</span>' : '<span class="badge no">closed</span>');
+    const diSection = '<div class="label">Dine-in</div>' +
+      (diOpen ? '<div class="times">'+diTimes+'</div>' : '<div class="closed-note">No dine-in yet</div>');
+    const taSection = '<div class="label">Takeaway</div>' +
+      (taOpen ? '<div class="times">'+taTimes+'</div>' : '<div class="closed-note">No takeaway</div>');
     const bookUrl = (data.bookingPage || 'https://reservation.umai.io/en/widget/rembayung')
       + '?party_size=' + (data.partySize || 3) + '&date=' + d.date;
-    const book = d.available
-      ? '<a class="book" href="'+ bookUrl +'" target="_blank" rel="noopener">Book this date on UMAI &rarr;</a>'
+    const book = (diOpen || taOpen)
+      ? '<a class="book" href="'+ bookUrl +'" target="_blank" rel="noopener">' +
+        (diOpen ? 'Book this date on UMAI &rarr;' : 'Book takeaway on UMAI &rarr;') + '</a>'
       : '';
     card.innerHTML =
       '<div class="top"><span class="date">'+fmtDate(d.date)+'</span>'+ status +'</div>'+
       '<div class="day">'+ (d.day||'') +'</div>'+
-      note +
-      (times ? '<div class="times">'+times+'</div>' : '') +
-      book;
-    if (d.available) {
+      diSection + taSection + book;
+    if (diOpen || taOpen) {
       card.onclick = function(e){
         if (e.target.tagName === 'A') return;   // let the link handle its own click
         window.open(bookUrl, '_blank', 'noopener');
