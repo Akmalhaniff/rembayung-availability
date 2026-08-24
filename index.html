@@ -54,12 +54,19 @@
   <div class="empty" id="empty" style="display:none;">No dine-in slots open right now. Check back soon.</div>
 </main>
 <footer>
-  Auto-refreshes every minute &middot; data is recomputed on the server every 15 min.<br/>
+  Auto-refreshes every minute &middot; data is refreshed every 15&ndash;30 min.<br/>
   Dine-in and takeaway are shown separately &mdash; orange = dine-in, blue = takeaway.
 </footer>
 
 <script>
 const REFRESH_MS = 60000;
+
+// Live data straight from the repo (works from any host, incl. Netlify).
+// Falls back to the bundled copy if GitHub is unreachable.
+const DATA_URLS = [
+  'https://raw.githubusercontent.com/Akmalhaniff/rembayung-availability/main/availability.json',
+  'availability.json'
+];
 
 function fmtDate(s){
   const d = new Date(s + "T00:00:00");
@@ -77,14 +84,16 @@ function fmtTime(t){
 }
 
 async function load(){
-  try {
-    const res = await fetch('availability.json', { cache:'no-store' });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    render(data);
-  } catch(e){
-    document.getElementById('updated').textContent = 'Could not load data: ' + e.message;
+  let lastErr;
+  for(const url of DATA_URLS){
+    try {
+      const res = await fetch(url, { cache:'no-store' });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      render(await res.json());
+      return;
+    } catch(e){ lastErr = e; }
   }
+  document.getElementById('updated').textContent = 'Could not load data: ' + lastErr.message;
 }
 
 function render(data){

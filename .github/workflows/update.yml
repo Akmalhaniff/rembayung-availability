@@ -49,7 +49,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No change to availability.json"
           else
-            git commit -m "data $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git commit -m "data $(date -u +%Y-%m-%dT%H:%M:%SZ) [skip netlify]"
             git push
           fi
 
