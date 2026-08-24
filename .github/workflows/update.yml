@@ -2,7 +2,11 @@ name: Update Rembayung availability
 
 on:
   schedule:
-    - cron: '*/15 * * * *'       # every 15 minutes (UTC) — page still re-renders every 1 min
+    # Two offset lanes, still ~every 15 min combined. Avoids the exact top-of-hour
+    # marks (:00/:15/:30/:45) where GitHub's scheduler queue is most congested,
+    # and gives a second lane so a delayed run doesn't open a 60-min gap.
+    - cron: '7,22,37,52 * * * *'
+    - cron: '11,41 * * * *'
   workflow_dispatch:              # "Run workflow" button
   push:
     branches: [main]
