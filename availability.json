@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-08-26 03:16:36",
+  "lastUpdated": "2026-08-26 03:28:43",
   "partySize": 3,
   "note": "Dine-in and takeaway are shown separately.",
   "bookingPage": "https://reservation.umai.io/en/widget/rembayung",
@@ -103,15 +103,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "18:15",
-        "18:30"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-08-26 03:16:36"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-09-03",
@@ -126,7 +123,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-08-26 03:16:36"
+      "takeawayOpenedAt": "2026-08-26 03:28:43"
     },
     {
       "date": "2026-09-04",
@@ -184,7 +181,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-08-26 03:16:36"
+      "takeawayOpenedAt": "2026-08-26 03:28:43"
     },
     {
       "date": "2026-09-08",
@@ -203,7 +200,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-08-26 03:16:36"
+      "takeawayOpenedAt": "2026-08-26 03:28:43"
     }
   ]
 }
