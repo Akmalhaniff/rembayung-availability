@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-01 05:19:48",
+  "lastUpdated": "2026-09-01 07:45:47",
   "partySize": 3,
   "note": "Dine-in and takeaway are shown separately.",
   "bookingPage": "https://reservation.umai.io/en/widget/rembayung",
@@ -92,14 +92,12 @@
       "name": "",
       "takeaway": true,
       "takeawayTimes": [
-        "12:30",
-        "12:45",
-        "18:30"
+        "12:45"
       ],
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 05:19:48"
+      "takeawayOpenedAt": "2026-09-01 07:45:47"
     },
     {
       "date": "2026-09-08",
@@ -118,7 +116,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 05:19:48"
+      "takeawayOpenedAt": "2026-09-01 07:45:47"
     },
     {
       "date": "2026-09-09",
@@ -137,7 +135,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 05:19:48"
+      "takeawayOpenedAt": "2026-09-01 07:45:47"
     },
     {
       "date": "2026-09-10",
@@ -156,7 +154,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 05:19:48"
+      "takeawayOpenedAt": "2026-09-01 07:45:47"
     },
     {
       "date": "2026-09-11",
@@ -185,7 +183,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 05:19:48"
+      "takeawayOpenedAt": "2026-09-01 07:45:47"
     },
     {
       "date": "2026-09-13",
@@ -204,7 +202,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 05:19:48"
+      "takeawayOpenedAt": "2026-09-01 07:45:47"
     },
     {
       "date": "2026-09-14",
@@ -223,7 +221,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 05:19:48"
+      "takeawayOpenedAt": "2026-09-01 07:45:47"
     }
   ]
 }
