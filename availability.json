@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-01 10:14:53",
+  "lastUpdated": "2026-09-01 13:28:31",
   "partySize": 3,
   "note": "Dine-in and takeaway are shown separately.",
   "bookingPage": "https://reservation.umai.io/en/widget/rembayung",
@@ -90,14 +90,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:45"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 10:14:53"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-09-08",
@@ -116,7 +114,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 10:14:53"
+      "takeawayOpenedAt": "2026-09-01 13:28:31"
     },
     {
       "date": "2026-09-09",
@@ -135,7 +133,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 10:14:53"
+      "takeawayOpenedAt": "2026-09-01 13:28:31"
     },
     {
       "date": "2026-09-10",
@@ -154,7 +152,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 10:14:53"
+      "takeawayOpenedAt": "2026-09-01 13:28:31"
     },
     {
       "date": "2026-09-11",
@@ -183,7 +181,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 10:14:53"
+      "takeawayOpenedAt": "2026-09-01 13:28:31"
     },
     {
       "date": "2026-09-13",
@@ -202,7 +200,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 10:14:53"
+      "takeawayOpenedAt": "2026-09-01 13:28:31"
     },
     {
       "date": "2026-09-14",
@@ -221,7 +219,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-01 10:14:53"
+      "takeawayOpenedAt": "2026-09-01 13:28:31"
     }
   ]
 }
