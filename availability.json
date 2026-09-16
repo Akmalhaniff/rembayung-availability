@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-16 05:10:12",
+  "lastUpdated": "2026-09-16 06:43:43",
   "partySize": 3,
   "note": "Dine-in and takeaway are shown separately.",
   "bookingPage": "https://reservation.umai.io/en/widget/rembayung",
@@ -12,14 +12,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "18:30"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-09-17",
@@ -36,7 +34,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": "2026-09-16 06:43:43"
     },
     {
       "date": "2026-09-18",
@@ -57,14 +55,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:30"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-09-20",
@@ -80,7 +76,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": "2026-09-16 06:43:43"
     },
     {
       "date": "2026-09-21",
@@ -99,7 +95,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": "2026-09-16 06:43:43"
     },
     {
       "date": "2026-09-22",
@@ -118,7 +114,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": "2026-09-16 06:43:43"
     },
     {
       "date": "2026-09-23",
@@ -137,7 +133,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": "2026-09-16 06:43:43"
     },
     {
       "date": "2026-09-24",
@@ -156,7 +152,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": "2026-09-16 06:43:43"
     },
     {
       "date": "2026-09-25",
@@ -186,7 +182,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": "2026-09-16 06:43:43"
     },
     {
       "date": "2026-09-27",
@@ -205,7 +201,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": "2026-09-16 06:43:43"
     },
     {
       "date": "2026-09-28",
@@ -224,7 +220,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": "2026-09-16 06:43:43"
     },
     {
       "date": "2026-09-29",
@@ -243,7 +239,7 @@
       "takeawayName": "",
       "note": "no dine-in yet",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-16 05:10:12"
+      "takeawayOpenedAt": "2026-09-16 06:43:43"
     }
   ]
 }
