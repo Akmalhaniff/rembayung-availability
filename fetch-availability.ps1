@@ -16,6 +16,9 @@ param(
 $ErrorActionPreference = 'Stop'
 $BaseUrl = "https://letsumai.com/widget/api"
 $Ua      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+# Malaysia Time (MYT, UTC+8)
+$tz = try { [TimeZoneInfo]::FindSystemTimeZoneById('Asia/Kuala_Lumpur') } catch { [TimeZoneInfo]::FindSystemTimeZoneById('Malay Peninsula Standard Time') }
+function Get-MytNow { return [TimeZoneInfo]::ConvertTimeFromUtc([DateTime]::UtcNow, $tz) }
 
 # Fall back to environment variables if params not supplied (used by GitHub Actions secrets).
 if (-not $TelegramToken)  { $TelegramToken  = $env:TELEGRAM_BOT_TOKEN }
@@ -154,7 +157,7 @@ function Send-Telegram($Token, $ChatId, $Msg) {
 # ---------------- MAIN ----------------
 $key   = Get-ApiKey
 $token = Get-AltchaToken   # solve once up front so the first slots call carries it
-$start = Get-Date
+$start = Get-MytNow
 $results = @()
 
 Write-Host "Scanning next $Days days (party of $PartySize) for dine-in and takeaway..."
@@ -219,7 +222,7 @@ foreach ($r in $results) {
 $windowDays = $null
 if ($furthest) {
     $fbDate = [datetime]::Parse($furthest)
-    $windowDays = ($fbDate - (Get-Date).Date).Days
+    $windowDays = ($fbDate - (Get-MytNow).Date).Days
     Write-Host "Booking horizon: up to $furthest (window ~$windowDays days)"
 }
 
@@ -236,7 +239,7 @@ if (Test-Path $openedFile) {
         if ($o.takeaway) { foreach ($k in $o.takeaway.PSObject.Properties.Name) { $opened.takeaway[$k] = $o.takeaway.$k } }
     } catch { Write-Host "[opened] could not read: $_" }
 }
-$nowIso = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+$nowIso = (Get-MytNow).ToString('yyyy-MM-dd HH:mm:ss')
 foreach ($r in $results) {
     if ($r.available -and -not $opened.dineIn[$r.date])   { $opened.dineIn[$r.date]   = $nowIso }
     if ($r.takeaway -and -not $opened.takeaway[$r.date]) { $opened.takeaway[$r.date] = $nowIso }
@@ -246,7 +249,7 @@ foreach ($r in $results) {
 $opened | ConvertTo-Json -Depth 3 | Set-Content -Path $openedFile -Encoding UTF8
 
 $out = [PSCustomObject]@{
-    lastUpdated        = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    lastUpdated        = (Get-MytNow).ToString('yyyy-MM-dd HH:mm:ss') + ' MYT'
     partySize          = $PartySize
     note               = 'Dine-in and takeaway are shown separately.'
     bookingPage        = $BookingPage

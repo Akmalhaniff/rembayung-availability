@@ -54,8 +54,9 @@
   <div class="empty" id="empty" style="display:none;">No dine-in slots open right now. Check back soon.</div>
 </main>
 <footer>
-  Auto-refreshes every minute &middot; data is refreshed every 15&ndash;30 min.<br/>
-  Dine-in and takeaway are shown separately &mdash; orange = dine-in, blue = takeaway.
+  Auto-refreshes every minute &middot; data is refreshed every 5 min (MYT).<br/>
+  Dine-in and takeaway are shown separately &mdash; orange = dine-in, blue = takeaway.<br/>
+  All times are Malaysia Time (MYT, UTC+8).
 </footer>
 
 <script>
@@ -97,8 +98,9 @@ async function load(){
 }
 
 function render(data){
+  // lastUpdated is now in MYT (e.g. "2026-09-18 16:40:18 MYT")
   document.getElementById('updated').textContent =
-    'Last updated: ' + data.lastUpdated + (data.partySize ? '  ·  Party of ' + data.partySize : '');
+    'Last updated: ' + data.lastUpdated + (data.partySize ? '  ·  Party of ' + data.partySize : '') + ' (Malaysia Time)';
 
   const dates = data.dates || [];
   const open = dates.filter(d => d.available);
