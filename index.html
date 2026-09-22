@@ -107,6 +107,7 @@ function render(data){
 
   // Show queue / server error banner instead of "all closed"
   const q = document.getElementById('queue');
+  const allError = data.dates && data.dates.length > 0 && data.dates.every(d => d.note === 'error');
   if (data.serverError) {
     q.style.display = 'block';
     q.style.background = 'rgba(231,76,60,.12)';
@@ -124,6 +125,14 @@ function render(data){
     q.innerHTML = '⏳ <b>UMAI is in virtual queue</b><br>' +
       (data.queueMessage || 'Masa menunggu anda dianggarkan selama ' + mins + ' minit') +
       '<br><span style="font-size:.8em;opacity:.8">Job is waiting in line — will retry in ~' + mins + ' min (detected ' + (data.queueDetectedAt || '') + ')</span>';
+  } else if (allError) {
+    q.style.display = 'block';
+    q.style.background = 'rgba(231,76,60,.12)';
+    q.style.borderColor = 'rgba(231,76,60,.35)';
+    q.style.color = '#e74c3c';
+    q.innerHTML = '⚠️ <b>We can\'t reach our servers</b><br>' +
+      'They should be back up shortly - if you are experiencing this issue for a prolonged time please contact the venue' +
+      '<br><span style="font-size:.8em;opacity:.8">All dates returned error — job will retry</span>';
   } else {
     q.style.display = 'none';
   }
