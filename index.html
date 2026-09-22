@@ -105,11 +105,22 @@ function render(data){
   document.getElementById('updated').textContent =
     'Last updated: ' + data.lastUpdated + (data.partySize ? '  ·  Party of ' + data.partySize : '') + ' (Malaysia Time)';
 
-  // Show queue banner instead of "all closed" when UMAI is in waiting line
+  // Show queue / server error banner instead of "all closed"
   const q = document.getElementById('queue');
-  if (data.queueActive) {
+  if (data.serverError) {
+    q.style.display = 'block';
+    q.style.background = 'rgba(231,76,60,.12)';
+    q.style.borderColor = 'rgba(231,76,60,.35)';
+    q.style.color = '#e74c3c';
+    q.innerHTML = '⚠️ <b>We can\'t reach our servers</b><br>' +
+      (data.serverErrorMessage || 'They should be back up shortly - if you are experiencing this issue for a prolonged time please contact the venue') +
+      '<br><span style="font-size:.8em;opacity:.8">Detected ' + (data.serverErrorAt || '') + ' — job will retry</span>';
+  } else if (data.queueActive) {
     const mins = data.queueWaitMins || 4;
     q.style.display = 'block';
+    q.style.background = 'rgba(241,196,15,.12)';
+    q.style.borderColor = 'rgba(241,196,15,.35)';
+    q.style.color = '#f1c40f';
     q.innerHTML = '⏳ <b>UMAI is in virtual queue</b><br>' +
       (data.queueMessage || 'Masa menunggu anda dianggarkan selama ' + mins + ' minit') +
       '<br><span style="font-size:.8em;opacity:.8">Job is waiting in line — will retry in ~' + mins + ' min (detected ' + (data.queueDetectedAt || '') + ')</span>';

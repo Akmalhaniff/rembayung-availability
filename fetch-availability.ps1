@@ -22,10 +22,19 @@ function Get-MytNow { return [TimeZoneInfo]::ConvertTimeFromUtc([DateTime]::UtcN
 $script:QueueActive = $false
 $script:QueueWaitMins = 0
 $script:QueueMessage = ""
+$script:ServerError = $false
+$script:ServerErrorMessage = ""
 
 function Test-QueueAndWait {
     param([string]$Html)
     if (-not $Html) { return $false }
+    if ($Html -match "We can't reach our servers") {
+        $script:ServerError = $true
+        $script:ServerErrorMessage = "We can't reach our servers. They should be back up shortly - if you are experiencing this issue for a prolonged time please contact the venue"
+        Write-Host "[server] UMAI servers unreachable - will retry..." -ForegroundColor Red
+        Start-Sleep -Seconds 60
+        return $true
+    }
     if ($Html -match 'Masa menunggu anda dianggarkan selama\s*(\d+)\s*minit' -or $Html -match 'giliran maya' -or $Html -match 'Anda kini dalam talian') {
         $mins = 4
         if ($Matches[1]) { try { $mins = [int]$Matches[1] } catch {} }
@@ -114,8 +123,8 @@ function Http-Json {
         if (-not $res) { throw "No response on $Path" }
         $sr = New-Object System.IO.StreamReader($res.GetResponseStream())
         $txt = $sr.ReadToEnd()
-        # UMAI waiting page returns HTML with queue message instead of JSON
-        if ($txt -match 'Masa menunggu|giliran maya|Anda kini dalam talian') {
+        # UMAI waiting page / server error returns HTML instead of JSON
+        if ($txt -match "We can't reach our servers|Masa menunggu|giliran maya|Anda kini dalam talian") {
             if (Test-QueueAndWait $txt) { continue }
         }
         if ($res.StatusCode -ne 200 -and $res.StatusCode -ne 201) {
@@ -124,7 +133,7 @@ function Http-Json {
         try {
             return ($txt | ConvertFrom-Json)
         } catch {
-            if ($txt -match 'Masa menunggu|giliran maya') {
+            if ($txt -match "We can't reach our servers|Masa menunggu|giliran maya") {
                 if (Test-QueueAndWait $txt) { continue }
             }
             throw "Invalid JSON on $Path : $txt"
@@ -314,6 +323,9 @@ $out = [PSCustomObject]@{
     queueWaitMins      = $script:QueueWaitMins
     queueMessage       = $script:QueueMessage
     queueDetectedAt    = if ($script:QueueActive) { (Get-MytNow).ToString('yyyy-MM-dd HH:mm:ss') + ' MYT' } else { $null }
+    serverError        = $script:ServerError
+    serverErrorMessage = $script:ServerErrorMessage
+    serverErrorAt      = if ($script:ServerError) { (Get-MytNow).ToString('yyyy-MM-dd HH:mm:ss') + ' MYT' } else { $null }
     dates              = $results
 }
 $out | ConvertTo-Json -Depth 4 | Set-Content -Path $OutFile -Encoding UTF8
