@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-22 11:59:45 MYT",
+  "lastUpdated": "2026-09-22 12:00:49 MYT",
   "partySize": 3,
   "note": "Dine-in and takeaway are shown separately.",
   "bookingPage": "https://reservation.umai.io/en/widget/rembayung",
@@ -9,6 +9,9 @@
   "queueWaitMins": 0,
   "queueMessage": "",
   "queueDetectedAt": null,
+  "serverError": false,
+  "serverErrorMessage": "",
+  "serverErrorAt": null,
   "dates": [
     {
       "date": "2026-09-22",
