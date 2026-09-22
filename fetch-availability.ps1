@@ -20,6 +20,22 @@ $Ua      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 $tz = try { [TimeZoneInfo]::FindSystemTimeZoneById('Asia/Kuala_Lumpur') } catch { [TimeZoneInfo]::FindSystemTimeZoneById('Malay Peninsula Standard Time') }
 function Get-MytNow { return [TimeZoneInfo]::ConvertTimeFromUtc([DateTime]::UtcNow, $tz) }
 
+function Test-QueueAndWait {
+    param([string]$Html)
+    if (-not $Html) { return $false }
+    if ($Html -match 'Masa menunggu anda dianggarkan selama\s*(\d+)\s*minit' -or $Html -match 'giliran maya' -or $Html -match 'Anda kini dalam talian') {
+        $mins = 4
+        if ($Matches[1]) { try { $mins = [int]$Matches[1] } catch {} }
+        if ($mins -lt 1) { $mins = 1 }
+        if ($mins -gt 15) { $mins = 15 }
+        $waitSec = $mins * 60 + 15
+        Write-Host "[queue] Waiting page detected (est. $mins min) - sleeping $waitSec sec..." -ForegroundColor Yellow
+        Start-Sleep -Seconds $waitSec
+        return $true
+    }
+    return $false
+}
+
 # Fall back to environment variables if params not supplied (used by GitHub Actions secrets).
 if (-not $TelegramToken)  { $TelegramToken  = $env:TELEGRAM_BOT_TOKEN }
 if (-not $TelegramChatId) { $TelegramChatId = $env:TELEGRAM_CHAT_ID }
@@ -30,15 +46,20 @@ $script:AltchaExpire = 0
 
 function Get-ApiKey {
     if ($script:ApiKey) { return $script:ApiKey }
-    try {
-        $src = (Invoke-WebRequest -Uri $LiveKeyUrl -UseBasicParsing -TimeoutSec 20 -UserAgent $Ua).Content
-        $m = [regex]::Match($src, 'widgetApiKey[\s\S]{0,2000}?([A-Za-z0-9-]{20,})')
-        if ($m.Success -and $m.Groups[1].Value.Length -ge 20) {
-            $script:ApiKey = $m.Groups[1].Value
-            Write-Host "[key] live key: $($script:ApiKey.Substring(0,12))..."
-            return $script:ApiKey
-        }
-    } catch { Write-Host "[key] live fetch failed: $_" }
+    for ($attempt = 0; $attempt -lt 5; $attempt++) {
+        try {
+            $src = (Invoke-WebRequest -Uri $LiveKeyUrl -UseBasicParsing -TimeoutSec 20 -UserAgent $Ua).Content
+            if (Test-QueueAndWait $src) { continue }
+            $m = [regex]::Match($src, 'widgetApiKey[\s\S]{0,2000}?([A-Za-z0-9-]{20,})')
+            if ($m.Success -and $m.Groups[1].Value.Length -ge 20) {
+                $script:ApiKey = $m.Groups[1].Value
+                Write-Host "[key] live key: $($script:ApiKey.Substring(0,12))..."
+                return $script:ApiKey
+            }
+            Write-Host "[key] key not found in page, attempt $($attempt+1)"
+        } catch { Write-Host "[key] live fetch failed: $_" }
+        if ($attempt -lt 4) { Start-Sleep -Seconds 5 }
+    }
     $script:ApiKey = $ApiKeyFallback
     Write-Host "[key] using fallback key"
     return $script:ApiKey
@@ -70,25 +91,40 @@ function Get-AltchaToken {
 
 function Http-Json {
     param($Method, $Path, $Key, $BodyBytes, $Token)
-    $req = [System.Net.HttpWebRequest]::Create("$BaseUrl/$Path")
-    $req.Method = $Method; $req.UserAgent = $Ua; $req.Accept = 'application/json'
-    $req.Referer = $BookingPage
-    $req.Headers.Add('Origin', 'https://reservation.umai.io')
-    $req.Headers.Add('VENUE-API-KEY', $Key)
-    if ($Token) { $req.Headers.Add('X-Altcha-Token', $Token) }
-    $req.Timeout = 20000
-    if ($BodyBytes) {
-        $req.ContentType = 'application/json'
-        $rs = $req.GetRequestStream(); $rs.Write($BodyBytes, 0, $BodyBytes.Length); $rs.Close()
+    for ($qAttempt = 0; $qAttempt -lt 5; $qAttempt++) {
+        $req = [System.Net.HttpWebRequest]::Create("$BaseUrl/$Path")
+        $req.Method = $Method; $req.UserAgent = $Ua; $req.Accept = 'application/json'
+        $req.Referer = $BookingPage
+        $req.Headers.Add('Origin', 'https://reservation.umai.io')
+        $req.Headers.Add('VENUE-API-KEY', $Key)
+        if ($Token) { $req.Headers.Add('X-Altcha-Token', $Token) }
+        $req.Timeout = 20000
+        if ($BodyBytes) {
+            $req.ContentType = 'application/json'
+            $rs = $req.GetRequestStream(); $rs.Write($BodyBytes, 0, $BodyBytes.Length); $rs.Close()
+        }
+        try { $res = $req.GetResponse() }
+        catch [System.Net.WebException] { $res = $_.Exception.Response }
+        if (-not $res) { throw "No response on $Path" }
+        $sr = New-Object System.IO.StreamReader($res.GetResponseStream())
+        $txt = $sr.ReadToEnd()
+        # UMAI waiting page returns HTML with queue message instead of JSON
+        if ($txt -match 'Masa menunggu|giliran maya|Anda kini dalam talian') {
+            if (Test-QueueAndWait $txt) { continue }
+        }
+        if ($res.StatusCode -ne 200 -and $res.StatusCode -ne 201) {
+            throw "HTTP $($res.StatusCode) on $Path : $txt"
+        }
+        try {
+            return ($txt | ConvertFrom-Json)
+        } catch {
+            if ($txt -match 'Masa menunggu|giliran maya') {
+                if (Test-QueueAndWait $txt) { continue }
+            }
+            throw "Invalid JSON on $Path : $txt"
+        }
     }
-    try { $res = $req.GetResponse() }
-    catch [System.Net.WebException] { $res = $_.Exception.Response }
-    $sr = New-Object System.IO.StreamReader($res.GetResponseStream())
-    $txt = $sr.ReadToEnd()
-    if ($res.StatusCode -ne 200 -and $res.StatusCode -ne 201) {
-        throw "HTTP $($res.StatusCode) on $Path : $txt"
-    }
-    return ($txt | ConvertFrom-Json)
+    throw "Queue wait exceeded retries on $Path"
 }
 
 function Get-Slots($Key, $Date, $Token) {
@@ -164,16 +200,29 @@ Write-Host "Scanning next $Days days (party of $PartySize) for dine-in and takea
 for ($i = 0; $i -lt $Days; $i++) {
     $d = $start.AddDays($i)
     $dateStr = $d.ToString('yyyy-MM-dd')
-    try {
-        $slots = Get-Slots -Key $key -Date $dateStr -Token $token
-        $cat = Find-Categories $slots
-        $times = $cat.dineIn
-        $takeTimes = $cat.takeaway
-    } catch {
-        Write-Host "  $dateStr : error ($_)"
-        $results += [PSCustomObject]@{ date=$dateStr; day=$d.ToString('ddd'); available=$false; times=@(); name=''; takeaway=$false; takeawayTimes=@(); takeawayName=''; note='error' }
-        continue
+    $queueRetries = 0
+    while ($true) {
+        try {
+            $slots = Get-Slots -Key $key -Date $dateStr -Token $token
+            $cat = Find-Categories $slots
+            $times = $cat.dineIn
+            $takeTimes = $cat.takeaway
+            break
+        } catch {
+            $msg = $_.Exception.Message
+            if ($msg -match 'Masa menunggu|giliran maya|Queue wait exceeded' -and $queueRetries -lt 3) {
+                $queueRetries++
+                Write-Host "  $dateStr : queue detected, retry $queueRetries..."
+                continue
+            }
+            Write-Host "  $dateStr : error ($_)"
+            $times = @(); $takeTimes = @()
+            $results += [PSCustomObject]@{ date=$dateStr; day=$d.ToString('ddd'); available=$false; times=@(); name=''; takeaway=$false; takeawayTimes=@(); takeawayName=''; note='error' }
+            $times = $null # signal already handled
+            break
+        }
     }
+    if ($null -eq $times) { continue }
     $available = $times.Count -gt 0
     $takeawayAvail = $takeTimes.Count -gt 0
     $results += [PSCustomObject]@{
