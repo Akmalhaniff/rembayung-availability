@@ -38,6 +38,8 @@
   .book { display:inline-block; margin-top:10px; color:var(--accent); text-decoration:none; font-weight:600; }
   .empty { text-align:center; color:var(--muted); margin-top:30px; }
   .horizon { text-align:center; margin:0 0 18px; font-size:.9rem; color:var(--accent); }
+  .queue { background:rgba(241,196,15,.12); border:1px solid rgba(241,196,15,.35); color:#f1c40f; border-radius:12px; padding:12px 14px; text-align:center; margin:0 0 18px; font-size:.95rem; line-height:1.4; }
+  .queue b { color:#f39c12; }
   footer { text-align:center; color:var(--muted); font-size:.75rem; padding:0 16px 30px; }
   a { color:var(--accent); }
 </style>
@@ -48,6 +50,7 @@
   <div class="sub" id="updated">Loading&hellip;</div>
 </header>
 <main>
+  <div id="queue" class="queue" style="display:none;"></div>
   <div class="summary" id="summary"></div>
   <div class="horizon" id="horizon"></div>
   <div id="list"></div>
@@ -101,6 +104,18 @@ function render(data){
   // lastUpdated is now in MYT (e.g. "2026-09-18 16:40:18 MYT")
   document.getElementById('updated').textContent =
     'Last updated: ' + data.lastUpdated + (data.partySize ? '  ·  Party of ' + data.partySize : '') + ' (Malaysia Time)';
+
+  // Show queue banner instead of "all closed" when UMAI is in waiting line
+  const q = document.getElementById('queue');
+  if (data.queueActive) {
+    const mins = data.queueWaitMins || 4;
+    q.style.display = 'block';
+    q.innerHTML = '⏳ <b>UMAI is in virtual queue</b><br>' +
+      (data.queueMessage || 'Masa menunggu anda dianggarkan selama ' + mins + ' minit') +
+      '<br><span style="font-size:.8em;opacity:.8">Job is waiting in line — will retry in ~' + mins + ' min (detected ' + (data.queueDetectedAt || '') + ')</span>';
+  } else {
+    q.style.display = 'none';
+  }
 
   const dates = data.dates || [];
   const open = dates.filter(d => d.available);

@@ -19,6 +19,9 @@ $Ua      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 # Malaysia Time (MYT, UTC+8)
 $tz = try { [TimeZoneInfo]::FindSystemTimeZoneById('Asia/Kuala_Lumpur') } catch { [TimeZoneInfo]::FindSystemTimeZoneById('Malay Peninsula Standard Time') }
 function Get-MytNow { return [TimeZoneInfo]::ConvertTimeFromUtc([DateTime]::UtcNow, $tz) }
+$script:QueueActive = $false
+$script:QueueWaitMins = 0
+$script:QueueMessage = ""
 
 function Test-QueueAndWait {
     param([string]$Html)
@@ -28,6 +31,9 @@ function Test-QueueAndWait {
         if ($Matches[1]) { try { $mins = [int]$Matches[1] } catch {} }
         if ($mins -lt 1) { $mins = 1 }
         if ($mins -gt 15) { $mins = 15 }
+        $script:QueueActive = $true
+        $script:QueueWaitMins = $mins
+        $script:QueueMessage = "Masa menunggu anda dianggarkan selama $mins minit"
         $waitSec = $mins * 60 + 15
         Write-Host "[queue] Waiting page detected (est. $mins min) - sleeping $waitSec sec..." -ForegroundColor Yellow
         Start-Sleep -Seconds $waitSec
@@ -304,6 +310,10 @@ $out = [PSCustomObject]@{
     bookingPage        = $BookingPage
     furthestBookable   = $furthest
     bookingWindowDays  = $windowDays
+    queueActive        = $script:QueueActive
+    queueWaitMins      = $script:QueueWaitMins
+    queueMessage       = $script:QueueMessage
+    queueDetectedAt    = if ($script:QueueActive) { (Get-MytNow).ToString('yyyy-MM-dd HH:mm:ss') + ' MYT' } else { $null }
     dates              = $results
 }
 $out | ConvertTo-Json -Depth 4 | Set-Content -Path $OutFile -Encoding UTF8
