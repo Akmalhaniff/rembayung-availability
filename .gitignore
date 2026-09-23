@@ -1,0 +1,3 @@
+run-local.ps1
+.env
+*.key
