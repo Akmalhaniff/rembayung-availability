@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2026-09-24 10:16:02 MYT",
+  "lastUpdated": "2026-09-24 10:16:45 MYT",
   "partySize": 3,
   "note": "Dine-in and takeaway are shown separately.",
   "bookingPage": "https://reservation.umai.io/en/widget/rembayung",
-  "furthestBookable": "2026-10-04",
-  "bookingWindowDays": 10,
+  "furthestBookable": null,
+  "bookingWindowDays": null,
   "queueActive": false,
   "queueWaitMins": 0,
   "queueMessage": "",
@@ -19,17 +19,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:30",
-        "12:45",
-        "18:30",
-        "18:45"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-18 07:21:34"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-09-25",
@@ -40,7 +35,7 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
       "takeawayOpenedAt": null
     },
@@ -53,7 +48,7 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
       "takeawayOpenedAt": null
     },
@@ -63,15 +58,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "18:30",
-        "18:45"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-18 07:21:34"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-09-28",
@@ -79,18 +71,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:30",
-        "12:45",
-        "18:15",
-        "18:30",
-        "18:45"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-18 07:21:34"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-09-29",
@@ -98,18 +84,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:30",
-        "12:45",
-        "18:15",
-        "18:30",
-        "18:45"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-18 07:21:34"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-09-30",
@@ -117,18 +97,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:30",
-        "12:45",
-        "18:15",
-        "18:30",
-        "18:45"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-18 07:21:34"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-10-01",
@@ -136,18 +110,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:30",
-        "12:45",
-        "18:15",
-        "18:30",
-        "18:45"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-18 07:21:34"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-10-02",
@@ -158,7 +126,7 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
       "takeawayOpenedAt": null
     },
@@ -168,16 +136,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "18:15",
-        "18:30",
-        "18:45"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-20 08:00:19"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-10-04",
@@ -185,18 +149,12 @@
       "available": false,
       "times": [],
       "name": "",
-      "takeaway": true,
-      "takeawayTimes": [
-        "12:30",
-        "12:45",
-        "18:15",
-        "18:30",
-        "18:45"
-      ],
+      "takeaway": false,
+      "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
-      "takeawayOpenedAt": "2026-09-21 08:00:19"
+      "takeawayOpenedAt": null
     },
     {
       "date": "2026-10-05",
@@ -207,7 +165,7 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
       "takeawayOpenedAt": null
     },
@@ -220,7 +178,7 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
       "takeawayOpenedAt": null
     },
@@ -233,7 +191,7 @@
       "takeaway": false,
       "takeawayTimes": [],
       "takeawayName": "",
-      "note": "no dine-in yet",
+      "note": "error",
       "dineInOpenedAt": null,
       "takeawayOpenedAt": null
     }
