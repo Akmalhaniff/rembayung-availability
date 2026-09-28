@@ -7,6 +7,9 @@ if %errorlevel% neq 0 (
   powershell -Command "Start-Process '%~f0' -Verb RunAs"
   exit /b
 )
+echo Allowing SYSTEM to use this repo (git safe.directory)...
+git config --system --add safe.directory "%~dp0" 2>nul
+git config --system --get safe.directory
 echo Stopping old task (if running)...
 schtasks /delete /tn "Rembayung 5min" /f 2>nul
 echo Registering scheduled task...
