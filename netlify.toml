@@ -1,0 +1,4 @@
+# Site is served by GitHub Pages (local PC pushes data).
+# Cancel every Netlify build so 5-min data pushes use zero credits.
+[build]
+  ignore = "exit 0"
