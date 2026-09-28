@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rembayung Dine-In Availability</title>
+<style>
+  :root { --bg:#0f1115; --card:#1a1d24; --ok:#2ecc71; --muted:#8b93a1; --txt:#e8eaed; --accent:#e67e22; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+         background:var(--bg); color:var(--txt); line-height:1.5; }
+  header { padding:20px 16px 8px; text-align:center; }
+  h1 { margin:0 0 4px; font-size:1.5rem; }
+  .sub { color:var(--muted); font-size:.85rem; }
+  main { max-width:720px; margin:0 auto; padding:12px 16px 40px; }
+  .summary { text-align:center; margin:14px 0 20px; font-size:1.05rem; }
+  .summary b { color:var(--ok); }
+  .card { background:var(--card); border-radius:14px; padding:14px 16px; margin:10px 0;
+          box-shadow:0 1px 3px rgba(0,0,0,.4); }
+  .card.open { border-left:4px solid var(--ok); cursor:pointer; }
+  .card.open:hover { background:#20242c; }
+  .card.take { border-left:4px solid #5dade2; cursor:pointer; }
+  .card.take:hover { background:#20242c; }
+  .card.closed { opacity:.55; }
+  .card .top { display:flex; justify-content:space-between; align-items:baseline; }
+  .date { font-weight:600; font-size:1.1rem; }
+  .day { color:var(--muted); font-size:.85rem; }
+  .badge { font-size:.75rem; padding:2px 8px; border-radius:999px; }
+  .badge.yes { background:rgba(46,204,113,.15); color:var(--ok); }
+  .badge.no  { background:rgba(139,147,161,.15); color:var(--muted); }
+  .times { margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { background:rgba(230,126,34,.15); color:var(--accent); border-radius:8px;
+          padding:4px 10px; font-size:.9rem; }
+  .chip.take { background:rgba(52,152,219,.15); color:#5dade2; }
+  .label { margin-top:10px; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  .closed-note { color:var(--muted); font-size:.85rem; margin-top:2px; }
+  .opened { color:var(--muted); font-size:.75rem; margin-top:4px; }
+  .book { display:inline-block; margin-top:10px; color:var(--accent); text-decoration:none; font-weight:600; }
+  .empty { text-align:center; color:var(--muted); margin-top:30px; }
+  .horizon { text-align:center; margin:0 0 18px; font-size:.9rem; color:var(--accent); }
+  .queue { background:rgba(241,196,15,.12); border:1px solid rgba(241,196,15,.35); color:#f1c40f; border-radius:12px; padding:12px 14px; text-align:center; margin:0 0 18px; font-size:.95rem; line-height:1.4; }
+  .queue b { color:#f39c12; }
+  footer { text-align:center; color:var(--muted); font-size:.75rem; padding:0 16px 30px; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Rembayung &mdash; Dine-In Availability</h1>
+  <div class="sub" id="updated">Loading&hellip;</div>
+</header>
+<main>
+  <div id="queue" class="queue" style="display:none;"></div>
+  <div class="summary" id="summary"></div>
+  <div class="horizon" id="horizon"></div>
+  <div id="list"></div>
+  <div class="empty" id="empty" style="display:none;">No dine-in slots open right now. Check back soon.</div>
+</main>
+<footer>
+  Auto-refreshes every minute &middot; data is refreshed every 5 min (MYT).<br/>
+  Dine-in and takeaway are shown separately &mdash; orange = dine-in, blue = takeaway.<br/>
+  All times are Malaysia Time (MYT, UTC+8).
+</footer>
+
+<script>
+const REFRESH_MS = 60000;
+
+// Same-origin first (fresh right after Pages deploys), raw as fallback.
+// Cache-buster defeats CDN/browser staleness.
+const BUST = '?t=' + Date.now();
+const DATA_URLS = [
+  'availability.json' + BUST,
+  'https://raw.githubusercontent.com/Akmalhaniff/rembayung-availability/main/availability.json' + BUST
+];
+
+function fmtDate(s){
+  const d = new Date(s + "T00:00:00");
+  return d.toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' });
+}
+
+function fmtTime(t){
+  if (!t || t.length < 5) return t;
+  const p = t.split(':');
+  let h = parseInt(p[0], 10);
+  const m = p[1];
+  const ap = h >= 12 ? 'PM' : 'AM';
+  let h12 = h % 12; if (h12 === 0) h12 = 12;
+  return h12 + ':' + m + ' ' + ap;
+}
+
+async function load(){
+  let lastErr;
+  for(const url of DATA_URLS){
+    try {
+      const res = await fetch(url, { cache:'no-store' });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      render(await res.json());
+      return;
+    } catch(e){ lastErr = e; }
+  }
+  document.getElementById('updated').textContent = 'Could not load data: ' + lastErr.message;
+}
+
+function render(data){
+  // lastUpdated is now in MYT (e.g. "2026-09-18 16:40:18 MYT")
+  document.getElementById('updated').textContent =
+    'Last updated: ' + data.lastUpdated + (data.partySize ? '  ·  Party of ' + data.partySize : '') + ' (Malaysia Time)';
+
+  // Show queue / server error banner instead of "all closed"
+  const q = document.getElementById('queue');
+  const allError = data.dates && data.dates.length > 0 && data.dates.every(d => d.note === 'error');
+  if (data.serverError) {
+    q.style.display = 'block';
+    q.style.background = 'rgba(231,76,60,.12)';
+    q.style.borderColor = 'rgba(231,76,60,.35)';
+    q.style.color = '#e74c3c';
+    q.innerHTML = '⚠️ <b>We can\'t reach our servers</b><br>' +
+      (data.serverErrorMessage || 'They should be back up shortly - if you are experiencing this issue for a prolonged time please contact the venue') +
+      '<br><span style="font-size:.8em;opacity:.8">Detected ' + (data.serverErrorAt || '') + ' — job will retry</span>';
+  } else if (data.queueActive) {
+    const mins = data.queueWaitMins || 4;
+    q.style.display = 'block';
+    q.style.background = 'rgba(241,196,15,.12)';
+    q.style.borderColor = 'rgba(241,196,15,.35)';
+    q.style.color = '#f1c40f';
+    q.innerHTML = '⏳ <b>UMAI is in virtual queue</b><br>' +
+      (data.queueMessage || 'Masa menunggu anda dianggarkan selama ' + mins + ' minit') +
+      '<br><span style="font-size:.8em;opacity:.8">Job is waiting in line — will retry in ~' + mins + ' min (detected ' + (data.queueDetectedAt || '') + ')</span>';
+  } else if (allError) {
+    q.style.display = 'block';
+    q.style.background = 'rgba(231,76,60,.12)';
+    q.style.borderColor = 'rgba(231,76,60,.35)';
+    q.style.color = '#e74c3c';
+    q.innerHTML = '⚠️ <b>We can\'t reach our servers</b><br>' +
+      'They should be back up shortly - if you are experiencing this issue for a prolonged time please contact the venue' +
+      '<br><span style="font-size:.8em;opacity:.8">All dates returned error — job will retry</span>';
+  } else {
+    q.style.display = 'none';
+  }
+
+  const dates = data.dates || [];
+  const open = dates.filter(d => d.available);
+  const take = dates.filter(d => d.takeaway);
+  const summary = document.getElementById('summary');
+  summary.innerHTML = (open.length || take.length)
+    ? '🎉 <b>' + open.length + '</b> dine-in' + (open.length===1?'':'s') +
+      ' &middot; <b>' + take.length + '</b> takeaway open' +
+      ' (of ' + dates.length + ' days)'
+    : 'No dine-in or takeaway openings in the next ' + dates.length + ' days';
+
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  document.getElementById('empty').style.display = 'none';
+
+  const horizon = document.getElementById('horizon');
+  if (data.furthestBookable) {
+    horizon.innerHTML = 'Bookable up to <b>' + fmtDate(data.furthestBookable) + '</b>' +
+      (data.bookingWindowDays != null ? ' (window ~' + data.bookingWindowDays + ' days)' : '');
+  } else {
+    horizon.textContent = 'No bookable dates in the scanned range yet.';
+  }
+
+  dates.forEach(d => {
+    const diOpen = !!d.available, taOpen = !!d.takeaway;
+    const card = document.createElement('div');
+    card.className = 'card ' + (diOpen ? 'open' : (taOpen ? 'take' : 'closed'));
+    const diTimes = (d.times || []).map(t => '<span class="chip">'+fmtTime(t)+'</span>').join('');
+    const taTimes = (d.takeawayTimes || []).map(t => '<span class="chip take">'+fmtTime(t)+'</span>').join('');
+    const status = diOpen
+      ? '<span class="badge yes">DINE-IN OPEN</span>'
+      : (taOpen ? '<span class="badge no">takeaway only</span>' : '<span class="badge no">closed</span>');
+    const diOpened = (diOpen && d.dineInOpenedAt) ? '<div class="opened">opened ' + d.dineInOpenedAt + '</div>' : '';
+    const taOpened = (taOpen && d.takeawayOpenedAt) ? '<div class="opened">opened ' + d.takeawayOpenedAt + '</div>' : '';
+    const diSection = '<div class="label">Dine-in</div>' +
+      (diOpen ? '<div class="times">'+diTimes+'</div>'+diOpened : '<div class="closed-note">No dine-in yet</div>');
+    const taSection = '<div class="label">Takeaway</div>' +
+      (taOpen ? '<div class="times">'+taTimes+'</div>'+taOpened : '<div class="closed-note">No takeaway</div>');
+    const bookUrl = (data.bookingPage || 'https://reservation.umai.io/en/widget/rembayung')
+      + '?party_size=' + (data.partySize || 3) + '&date=' + d.date;
+    const book = (diOpen || taOpen)
+      ? '<a class="book" href="'+ bookUrl +'" target="_blank" rel="noopener">' +
+        (diOpen ? 'Book this date on UMAI &rarr;' : 'Book takeaway on UMAI &rarr;') + '</a>'
+      : '';
+    card.innerHTML =
+      '<div class="top"><span class="date">'+fmtDate(d.date)+'</span>'+ status +'</div>'+
+      '<div class="day">'+ (d.day||'') +'</div>'+
+      diSection + taSection + book;
+    if (diOpen || taOpen) {
+      card.onclick = function(e){
+        if (e.target.tagName === 'A') return;   // let the link handle its own click
+        window.open(bookUrl, '_blank', 'noopener');
+      };
+    }
+    list.appendChild(card);
+  });
+}
+
+load();
+setInterval(load, REFRESH_MS);
+</script>
+</body>
+</html>

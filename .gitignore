@@ -1,0 +1,4 @@
+run-job.log
+run-local.ps1
+.env
+*.key
